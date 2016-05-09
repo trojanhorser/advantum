@@ -10,12 +10,29 @@ function newData() {
   focusOn('concde');
 }
 
-function addNewRecord(sqlStatement){
+/**
+*
+*/
+function addNewRecord(){
+	
+}
+
+/**
+*
+*/
+function updateRecord(){
+	
+}
+
+/**
+*
+*/
+function deleteRecord(){
 	
 }
 
 
-function getData() {
+function getRecord() {
  sqltxt="select concde,connam,conadd,conadd2,conadd3,conadd4,conadd5,conemail from wsconsgn where concde="+valueOf('inconcde').sqlWrap();
  if (!sqlSelect(sqltxt,'$data',1)) {
       alert(sqlerr);
