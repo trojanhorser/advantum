@@ -11,9 +11,12 @@ function newData() {
 }
 
 /**
-*
+* Adds a new record to the specfied table
+* @param tableName - name of the table that will be modified
 */
-function addNewRecord(){
+function addNewRecord(tableName){
+	
+	alert(window.location);
  
 	 recordObject = {};
 	 recordObject.concde = valueOf('concde');
@@ -23,9 +26,9 @@ function addNewRecord(){
 	 recordObject.conadd3 = valueOf('conadd3');
 	 recordObject.conadd4 = valueOf('conadd4');
 	 recordObject.conadd5 = valueOf('conadd5');
-	 recordObject.conemail = valueOf('conadd5');
+	 recordObject.conemail = valueOf('conemail');
 	 
-	 if (!sqlInsert('wsconsgn',recordObject)) {
+	 if (!sqlInsert(tableName,recordObject)) {
 		  alert(sqlerr);
 	 }else{
 		 alert("Record Added Successfully")
