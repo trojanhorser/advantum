@@ -1,0 +1,1758 @@
+<html>
+<head><title>Query</title></head>
+<body style='background-color:white' onload=loadUp()>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type="text/JavaScript" src="../applications/startup.js"></script>
+<script type='text/JavaScript' src='../applications/dataDictionary.js'></script>
+
+<script>
+
+//fso = new ActiveXObject("Scripting.FileSystemObject");
+file$$array=new Array();
+alert('Problem with "Move-Up/Down"\n\nQuery result not right\n\nSee query definition "Strange"'); 
+function loadUp() {  
+ //l##="</TD><TD></TD";
+ //l2##="<.T>";
+
+ sqlselectbatch=1000;
+ checkVar('qrtd');
+ sumar=['[Sum]<br>','[Count]<br>','[Maximum]<br>','[Minimum]<br>','[Average]<br>'];
+ sumar2=new Array();
+ sumar2['sum']=0; sumar2['count']=1; sumar2['max']=2; sumar2['min']=3; sumar2['avg']=4;
+ //qrytables=new Array();
+ //fullqryobj=''; 
+ //sortnbr=0;
+ //wherecondition='';
+ //doresort=false;
+ //forcewheresave=false;
+
+  changeContent('qfilepath',queryfilepath);
+
+  dbtab=new tableDef();
+  dbtab.tableid='dbtable';
+  dbtab.tablestyle="cursor:default";
+  dbtab.header=['Table','Description','Selected'];
+  dbtab.id=['t#table','t#desc','t#sel'];
+  dbtab.rowselectcolor="";
+  dbtab.evenrowcolor="#effbff";
+  dbtab.oddrowcolor="#effbff";
+  dbtab.width=[65,150,0]; 
+  dbtab.tableonclick="exeFunction('dbtabClicked()')";
+ 
+  tablesf=new tableDef();
+  tablesf.tableid='tablesf';
+  tablesf.tablestyle="cursor:default";
+  tablesf.height=150;
+  tablesf.header=['Table'  ,'Field'   ,'Description' ,'edit'   ,'length'  ,'Sort'   ,'sortnbr'   ,'Group'    ,'align'  ,'Alias'   ,'type'  ];
+  tablesf.id=    ['sftabl' ,'sffield' ,'sfdesc'      ,'sfedit' ,'sfwidth' ,'sfsort' ,'sfsortnbr' ,'sfgroup' ,'sfalign' ,'sfalias' ,'sftype'];
+  tablesf.width= [70       ,70        ,120           ,0        ,0         ,90       ,0           ,95         ,0        ,0         ,0       ];
+
+  tablesel=new tableDef();
+  tablesel.tableid='tablesel';
+  tablesel.tablestyle="cursor:default";
+  tablesel.height=150;
+  tablesel.rowselectcolor="";
+  tablesel.header=['Table','Field','Description','Alias','select','edit','width','align','type'];
+  tablesel.tableid='tablesel';
+  tablesel.id=['stabl','sfield','sdesc','salias','ssel','sedit','swdth','salgn','stype'];
+  tablesel.width=[0,70,120,0,0,0,0,0,0];
+
+  table1=new tableDef();
+  table1.tableid='qrytable';
+  table1.rowselectcolor='';
+  table1.mouseovercolor=rowselectcolor;
+  table1.resizeablecolumns=true;
+  table1.onresizefunction="saveFldLen";
+  //table1.matchonid=true;
+  table1.height=250;
+
+  tablerel=new tableDef(); 
+  tablerel.tableid='tablerel';
+  tablerel.tablestyle="cursor:hand";
+  tablerel.tableonclick='tablerelClicked()';
+  tablerel.header=['table1','field1','table2','field2','RelationShip']
+  tablerel.id=['r1tabl','r1field','r2tabl','r2field','rdesc'];
+  tablerel.width=[0,0,0,0,400];
+  tablerel.height=100;
+
+  tablewhere=new tableDef();
+  tablewhere.tableid='tablewhere';
+  tablewhere.header=['Remove','( )','( )','( )','add/or','Field','Comparator','Value/<br>Field','( )','( )','( )'];
+  tablewhere.id=['wremove','woc1','woc2','woc3','wandor','wfld','wcmp','wval','wcc1','wcc2','wcc3'];
+  tablewhere.align[0]='center';
+  tablewhere.width=[50,40,40,40,60,170,170,180,40,40,40]; 
+
+  showElement('displayarea');
+  newDefinition();
+  bottomleftwidth=pagebottomleft.style.width;
+
+}
+
+function newDefinition() {
+ qrytables=new Array();
+ fullqryobj=new Object(); 
+ sortnbr=0;
+ wherecondition='';
+ doresort=false;
+ forcewheresave=false;
+  table1.sqlresult='';
+  changeContent('dbtabdata',applyTableDef(dbtab));
+  var tabar=new Array();
+  for (property in dataDic.table) { 
+      var obj=getDbTableAttr(property);
+      newRow('dbtable');
+      setRowBgColor('#effbff');
+      changeCol('t#table',property);
+      changeCol('t#desc',obj.desc); 
+  } 
+  sortTable('dbtable','t#desc');
+  changeContent('tablewheredata',applyTableDef(tablewhere));
+  changeContent('tablereldata',applyTableDef(tablerel));
+  changeContent('tablesfdata',applyTableDef(tablesf));
+  changeContent('table1data','');
+  hideElement('relspan','worktablesfbutton','getqrywherebutton','runuserqrybutton','qrysummaryspan');
+  changeContent('t1',''); changeContent('t2',''); changeContent('t3',''); changeContent('t4','');
+  changeVar('savefile','');
+  reFreshQryResultTable();
+}
+
+function importDefinition() {
+ var file$$arrayall;
+ file$$array=new Array();
+ var fname;
+ try {
+     file$$arrayall=listPcFiles(querydefinitionpath); 
+     for (var i=0; i<file$$arrayall.length; i++) {
+          fname=''+file$$arrayall[i];
+          fname=fname.split('.qdf'); 
+          if (fname.length>1) {
+              file$$array.push(file$$arrayall[i]); 
+          } 
+     } 
+ }
+ catch(e) {
+     alert('Problem extracting Query Definitions\n'+e.message);
+     return;
+ }
+ if (file$$array.length==0) {
+     alert('No Query definition found for import');
+     return;
+ }
+ //file$$array.sort(); 
+ var txt="<table style='cursor:default'>";
+ txt += "<tr onmouseover=colorBg(this,'gold'); onmouseout=colorBg(this,'*dft')><td style='border-bottom:1px solid; text-align:center; width:300;' onclick=getImportDefinition(-1)>------ New ------</td></tr>"; 
+ var fname=''; 
+ for (var i=0; i<file$$array.length; i++) {
+     fname=''+file$$array[i];
+     fname=fname.split('\\');
+     fname=fname[fname.length-1].split('.qdf');
+     fname=fname[0]; 
+     txt += "<tr onmouseover=colorBg(this,'gold'); onmouseout=colorBg(this,'*dft')><td style='border-bottom:1px solid; width:300;' onclick=getImportDefinition("+i+")>"+fname+"</td></tr>";
+ } 
+ txt += "</table>"; 
+ changeContent('filelist',txt); 
+ popUpContent('filelist'); 
+ ispop=false;
+}
+
+
+function getImportDefinition(nbr) {
+  if (nbr==-1) {
+      newDefinition()
+      return; 
+  } 
+  q$r$y$t$x$t=file$$array[nbr];
+  exeFunction('doImportDefinition()');
+}
+
+
+function doImportDefinition() {
+  newDefinition(); 
+  var alldata=getPcFileData(q$r$y$t$x$t);
+  var i=0; 
+  var colid;
+  var nbr;
+  var dbtable; 
+  if (!alldata) {return false};
+  try {eval(alldata)} catch(e) {alert(e.message); return false};
+ 
+ var tbl;
+ var i2=0;
+ posTabCursor('dbtable','top');
+ readRow();
+ while (!eof) {
+        for (i=0; i<tableslist.length; i++) {
+             tbl=valueOfCol('t#table'); 
+             if (tableslist[i]==tbl) {
+                 changeCol('t#sel','Y');
+                 setRowBgColor(rowselectcolor);
+                 qrytables.push(tbl);
+                 i2 ++;
+                 //buildDbTableTable(tbl,i2);
+                 break;
+             }
+        }
+        if (i2==tableslist.length) {break;}
+        readRow('dbtable');
+ }   
+
+
+  for (i=0; i<fieldlist.sftabl.length; i++) {
+       dbtable=fieldlist.sftabl[i];
+       newRow('tablesf');
+       for (j=0; j<tablesf.id.length; j++) {
+            colid=tablesf.id[j]; 
+            if (colid != 'sfgroup' && colid != 'sfsort') {
+                changeCol(colid,fieldlist[colid][i]);
+            }
+            else {
+                nbr=fieldlist['sfsortnbr'][i];
+                if (colid=='sfsort') {
+                    changeCol('sfsort',"<select name=sfsortsel"+nbr+" onchange='doresort=true'><option value=''></option><option value='A'>Ascend</option><option value='D'>Descend</option></select>");
+                    changeVar('sfsortsel'+nbr,fieldlist[colid][i]); 
+                }
+                else {
+                    if (colid=='sfgroup') {
+                        if (fieldlist['sftype'][i]!='numeric') {
+                            changeCol('sfgroup',"<select name=sfgrpsel"+nbr+"><option value='G'>Group By</option><option value='count'>Count</option><option value='max'>Max</option><option value='min'>Min</option></select>");
+                        }
+                        else {
+                            changeCol('sfgroup',"<select name=sfgrpsel"+nbr+"><option value='sum'>Sum</option><option value='avg'>Average</option><option value='count'>Count</option><option value='max'>Max</option><option value='min'>Min</option><option value='G'>Group By</option></select>");
+                        }
+                        changeVar('sfgrpsel'+nbr,fieldlist[colid][i]); 
+                    }  
+                }
+            } 
+       }
+
+   }
+
+
+   if ($querytype=='D') {
+       checkVar('qrtd');
+       hideElement('tablesf$ha7','tablesf$hb7');
+   }
+   else {
+      checkVar('qrts');
+      showElement('tablesf$ha7','tablesf$hb7');
+   }
+
+
+   getFlds();
+   for (i=0; i<relationshiplist.r1tabl.length; i++) {
+       newRow('tablerel');
+       for (j=0; j<tablerel.id.length; j++) {
+            changeCol(tablerel.id[j],relationshiplist[tablerel.id[j]][i]);
+       }
+   }
+   reFreshQryResultTable();
+   var colid;
+   var valpair;  
+   for (i=0; i<filterlist.wcmp.length; i++) {
+        newWhere(); 
+        for (property in filterlist) {
+             if (property!='wval') {
+                 changeVar('d'+property+currentrow,filterlist[property][i]);
+             } 
+             else {
+                 valpair=filterlist[property][i].split('@^@^'); 
+                 changeVar('dwval'+currentrow,valpair[0]);
+                 if (!isBlank(valpair[0])) {
+                      changeVar('dwval'+currentrow,valpair[0]);
+                 }
+                 else {changeVar('dwvalfld'+currentrow,valpair[1]);}
+             }
+        }
+   }     
+
+   if (qrytables.length>1) {showElement('relspan')}
+}
+
+
+function dbtabClicked() {
+  readClickedRow();
+  if (eof) return;
+  if (valueOfCol('t#sel') != 'Y') {
+      changeCol('t#sel','Y');
+      setRowBgColor(rowselectcolor);
+      qrytables.push(valueOfCol('t#table'));
+      table1.sqlresult=''; table1.sqlselect='';
+      if (table1.id.length>1) {
+          changeContent('table1data',applyTableDef(table1)); 
+      } 
+      getFlds();
+      reFreshQryResultTable(); 
+  }
+  else {
+      deleteQryTab(valueOfCol('t#table'));
+  }
+  if (qrytables.length>1) {showElement('relspan')}
+
+}
+
+function getFlds() {
+ changeContent('t1',''); changeContent('t2',''); changeContent('t3',''); changeContent('t4','');
+ qryfields=new Object();
+ allfields=new Array(); 
+ fullqryobj=new Object(); 
+ var a=-1;
+ var n=-1; 
+ aliaslist=new Array();
+
+ for (var x=0; x<qrytables.length; x++) {
+  var dbtable=qrytables[x];
+  if (dbtable != '') { 
+   eval('fullqryobj.'+dbtable+'=new Object');
+   eval('var qobj=fullqryobj.'+dbtable);  
+   qobj.field=new Array();
+   qobj.alias=new Array(); 
+   qobj.desc=new Array();
+   qobj.edit=new Array();
+   qobj.width=new Array();
+   qobj.align=new Array();
+   qobj.type=new Array();
+
+   var obj=getDbTableAttr(dbtable); 
+   if (obj) {
+       qobj.field=obj.field.split(','); 
+   }
+   else {
+       var sqltxt='select * from '+dbtable;
+       if (sqlSelect(sqltxt,'$z',1)) {
+          qobj.field=$$sqlcol;
+          delete $z;   
+       } 
+   }
+   for (var i=0; i<qobj.field.length; i++) {
+       obj=getFieldAttr(qobj.field[i]); 
+       qobj.desc[i]=obj.desc;
+       qobj.alias[i]='';
+       qobj.type[i]=obj.type;  
+       if (obj.type=='char') {qobj.edit[i]=''}
+       if (obj.type=='date') {qobj.edit[i]='y'}
+       if (obj.type=='time') {qobj.edit[i]='t'}
+       if (obj.type=='numeric') {qobj.edit[i]='0:'+obj.decimal} 
+       qobj.width[i]=obj.length*6.5; 
+       if (qobj.width[i]<80) {qobj.width[i]=80}
+       if (qobj.width[i]>380) {qobj.width[i]=380} 
+       if (obj.type=='date') {qobj.width[i]=70}
+       if (obj.type=='time') {qobj.width[i]=60}
+       qobj.align[i]=''; 
+       if (qobj.edit[i]) {qobj.align[i]='right'}; 
+       if (obj.length==1) {qobj.align[i]='center'}
+       n += 1;
+       allfields[n]=qobj.field[i];
+       if (x>0) {
+          for (var k=0; k<n-1; k++) {
+              if (allfields[k]==qobj.field[i]) {
+                  aliaslist.push(qobj.field[i]);
+                  break;
+              }
+          }
+       }
+   }
+  }
+ }
+ for (property in fullqryobj) {
+      eval('obj=fullqryobj.'+property);
+      for (i=0; i<obj.field.length; i++) {
+           for (var i2=0; i2<aliaslist.length; i2++) {
+               if (obj.field[i]==aliaslist[i2]) {
+                   a += 1; 
+                   eval('obj.alias[i]="a_lias'+a+'"');
+                   break;
+               }
+           }
+      }
+ }
+ 
+
+ i=0;
+ for (property in fullqryobj) { 
+      i +=1; 
+      buildDbTableTable(property,i);
+ }
+     
+}
+  
+function getFieldOrAlias(fld,als) {
+  if (als=='') return fld;
+  return als;
+}
+
+function buildQuery(qwhere) {
+  var txt="select ";
+  var obj='';
+  var tabcount=0;
+  var fldcount=0;
+  var x=0;
+  var i=0; 
+  var i2; 
+  var property;
+
+  var qrysltobj=new Object();
+  var matchfound;
+
+ //*********** Wrong logics...qrysltobj need not be used. Access tablesf  
+
+  posTabCursor('tablesf','top');
+  readRow();
+  var tbl;
+  var nbr;
+  while (!eof) {
+         tbl=valueOfCol('sftabl');
+         if (!qrysltobj[tbl]) {
+             qrysltobj[tbl]=new Object();
+             qrysltobj[tbl].field=new Array();
+             qrysltobj[tbl].alias=new Array();
+             qrysltobj[tbl].type=new Array();
+             qrysltobj[tbl].group=new Array();  
+             qrysltobj[tbl].nbr=new Array();  
+         }
+         qrysltobj[tbl].field.push(valueOfCol('sffield'));
+         qrysltobj[tbl].alias.push(valueOfCol('sfalias')); 
+         qrysltobj[tbl].type.push(valueOfCol('sftype'));
+         nbr=valueOfCol('sfsortnbr'); 
+         qrysltobj[tbl].nbr.push(nbr);
+         qrysltobj[tbl].group.push(valueOf('sfgrpsel'+nbr)); 
+         readRow(); 
+  } 
+
+  for (property in qrysltobj) {
+      obj=qrysltobj[property];
+      fldcount += obj.field.length; 
+  }
+
+  var groupbys=new Array();
+  var grp;
+
+  if (isCheckedVar('qrtd')) {
+      for (property in qrysltobj) {
+           obj=qrysltobj[property];
+           for (i=0; i<obj.field.length; i++) {
+                x += 1; 
+                if (obj.alias[i]=='') {txt += obj.field[i];}
+                else {txt += property+"."+obj.field[i]+" as "+obj.alias[i];}
+                if (x != fldcount) {txt += ',';}
+           }
+      } 
+   }
+   else {
+      for (property in qrysltobj) {
+           obj=qrysltobj[property];
+           for (i=0; i<obj.field.length; i++) {
+                x += 1;
+                grp=obj.group[i]; 
+                if (grp=='G') {
+                    if (obj.alias[i]=='') {txt += obj.field[i]; groupbys.push(obj.field[i])}
+                    else {txt += property+"."+obj.field[i]+" as "+obj.alias[i]; groupbys.push(obj.alias[i])}
+                }
+                else {
+                    txt += grp+'('+property+"."+obj.field[i]+") as summary"+obj.nbr[i];
+                }
+                if (x != fldcount) {txt += ',';}
+           }
+      } 
+   }
+   x=0; 
+   txt += ' from '; 
+
+   var tablesused=new Object();
+   for (property in qrysltobj) {
+        if (!tablesused[property]) {tablesused[property]=true; tabcount += 1;}
+   }
+
+   posTabCursor('tablerel','top');
+   readRow();
+   while (!eof) {
+     var tb=valueOfCol('r1tabl');
+     if (!tablesused[tb]) {tablesused[tb]=true; tabcount += 1;}
+     tb=valueOfCol('r2tabl');
+     if (!tablesused[tb]) {tablesused[tb]=true; tabcount += 1;}
+     readRow();
+   } 
+
+   for (property in tablesused) {
+        x += 1;
+        if (x != tabcount) {txt += property+',';}
+	else {txt += property}
+   }
+
+   var sqljoin='';
+   posTabCursor('tablerel','top');
+   readRow();
+   while (!eof) {
+    sqljoin += valueOfCol('r1tabl')+'.'+valueOfCol('r1field')+'='+valueOfCol('r2tabl')+'.'+valueOfCol('r2field');
+    if (moreRow()) sqljoin += ' and ';
+    readRow();
+   } 
+   
+   var sqlwhere=wherecondition; 
+   if (qwhere) sqlwhere=qwhere;
+
+   if (sqljoin || !isBlank(sqlwhere)) {
+      txt += ' where '; 
+      if (sqljoin) {txt += sqljoin}
+      if (!isBlank(sqlwhere)) {
+         if (sqljoin) {txt += " and ("+sqlwhere+")";} 
+         else {txt += sqlwhere} 
+      }
+   }
+
+   if (isCheckedVar('qrts') && groupbys.length>0) {
+       txt += ' Group by ';
+       for (i=0; i<groupbys.length; i++) {
+            txt += groupbys[i];
+            if (i+1<groupbys.length) {txt += ','} 
+       }     
+   }
+
+
+   var sqlsort='';
+   var sortcnt=0;  
+   posTabCursor('tablesf','top');
+   readRow();
+   while (!eof) {
+     var nbr=valueOfCol('sfsortnbr');
+     var order=valueOf('sfsortsel'+nbr);
+     if (order=='A' || order=='D' ) {
+        sortcnt++;
+     }
+     readRow(); 
+   }
+   if (sortcnt>0) { 
+       var x=0;
+       posTabCursor('tablesf','top');
+       readRow();
+       while (!eof) {
+          var nbr=valueOfCol('sfsortnbr');
+          var order=valueOf('sfsortsel'+nbr);
+          var grp=valueOf('sfgrpsel'+nbr)
+          if (order=='A' || order=='D' ) {
+             x++;
+             if (isCheckedVar('qrtd') || grp=='G') {
+                 sqlsort += valueOfCol('sftabl')+'.'+valueOfCol('sffield');
+             }
+             else {
+                 //sqlsort += 'summary'+valueOfCol('sfsortnbr');
+                 sqlsort += grp+'('+valueOfCol('sftabl')+'.'+valueOfCol('sffield')+')'; 
+             } 
+             if (order=='D') {sqlsort += ' desc'}
+             if (x<sortcnt) {sqlsort += ','}
+          }
+          readRow(); 
+       }
+       txt += ' order by '+sqlsort;
+   } 
+
+ return txt;
+}
+
+
+
+function buildDbTableTable(dbtable,nbr) {
+  var i=0;
+  var tobj='';
+  var tbl="dbtab"+nbr;
+  eval("var "+tbl+"=clone(tablesel)");
+  eval("tobj="+tbl);
+  tobj.tableid=tbl;
+  for (i-0; i<tobj.id.length; i++) {
+       tobj.id[i]=tobj.id[i]+nbr;
+  } 
+  eval("tobj.tableonclick='selectField("+nbr+")'"); 
+  var txt='<b><i>'+dbtable+'</i><br><span style="font-size:80%">'+getDbTableAttr(dbtable).desc.sst(1,30)+'</span></b><br>'+applyTableDef(tobj)+"<br><button onclick=deleteQryTab('"+dbtable+"')>Remove</button>&nbsp&nbsp<button style='width:130' onclick=selectAllFlds("+nbr+")>Select All Fields</button>";
+  var clmn="t"+nbr;
+  changeContent(clmn,txt); 
+  var obj='';
+  eval('obj=fullqryobj.'+dbtable); 
+  for (i=0; i<obj.field.length; i++) {
+       qfld=getFieldOrAlias(obj.field[i],obj.alias[i]); 
+       newRow(tbl);
+       setRowBgColor('white'); 
+       eval("changeCol('stabl"+nbr+"',dbtable)");
+       eval("changeCol('sfield"+nbr+"',obj.field[i])");
+       eval("changeCol('sdesc"+nbr+"',obj.desc[i])");
+       eval("changeCol('salias"+nbr+"',obj.alias[i])");
+       eval("changeCol('sedit"+nbr+"',obj.edit[i])");
+       eval("changeCol('swdth"+nbr+"',obj.width[i])");
+       eval("changeCol('salgn"+nbr+"',obj.align[i])");
+       eval("changeCol('stype"+nbr+"',obj.type[i])");
+       var crow=currentrow;
+       if (tagThisRow(dbtable, obj.field[i])) {
+          posTabCursor(tbl,crow); 
+          readRow(); 
+          changeCol('ssel'+nbr,'Y');
+          setRowBgColor('orange');
+          //hideRow(); 
+       }
+  }
+
+}
+
+function tagThisRow(dbtable,dbfield) {
+  posTabCursor('tablesf','top');
+  readRow();
+  while (!eof) {
+    if (valueOfCol('sftabl')==dbtable) {
+       if (valueOfCol('sffield')==dbfield) {
+          return true;
+       }
+    }
+    readRow();
+  }
+  return false;
+}
+
+
+function selectAllFlds(nbr) {
+ var tbl='dbtab'+nbr;
+ var crow=0;
+ posTabCursor(tbl,'top');
+ readRow(); 
+ while (!eof) {
+   if (valueOfCol(('ssel'+nbr)) !='Y') { 
+      crow=currentrow;
+      //setRowAsClicked(); readClickedRow(); alert(eof);
+      selectField(nbr,tbl,crow);
+      crow++;
+      posTabCursor(tbl,crow);
+   }
+   readRow();
+ }
+} 
+
+function deleteQryTab(qtab) {
+ qtab=qtab;
+ posTabCursor('dbtable','top');
+ readRow();
+ while (!eof) {
+  if (valueOfCol('t#table')==qtab) {
+     changeCol('t#sel','N');
+     setRowBgColor('#effbff'); //positionRow();
+     break;
+  }
+  readRow();
+ } 
+ qrytables=new Array();  
+ posTabCursor('dbtable','top');
+ readRow();
+ while (!eof) {
+  if (valueOfCol('t#sel')=='Y') {
+     qrytables.push(valueOfCol('t#table'));
+  }
+  readRow();
+ } 
+
+ posTabCursor('tablesf','top'); 
+ readRow();
+ while (!eof) {
+  if (valueOfCol('sftabl')==qtab) {
+     deleteRow(); 
+     posTabCursor('tablesf',currentrow);
+  }
+  readRow();
+ }
+ 
+ posTabCursor('tablerel','top');
+ readRow();
+ while (!eof) {
+   if (valueOfCol('r1tabl')==qtab || valueOfCol('r2tabl')==qtab) {
+      deleteRow();
+      posTabCursor('tablerel',currentrow);
+   }
+   readRow();
+ }
+
+ var wheresdeleted=0;
+ posTabCursor('tablewhere','top');
+ readRow();
+ while (!eof) {
+    var dwfld='dwfld'+currentrow;
+    var dwvalfld='dwvalfld'+currentrow;
+    dwvalfld=valueOf(dwvalfld);
+    var tbl1=dwvalfld.split('^')[0]; 
+    var tbl2=valueOf(dwfld).split('^')[0];
+    if (tbl1==qtab || tbl2==qtab) {
+       deleteRow();
+       wheresdeleted++;
+    }
+    readRow();
+ }
+
+ table1.sqlresult=''; table1.sqlselect=''; 
+ if (qrytables.length==1) {hideElement('relspan')}
+ if (qrytables.length==0) {hideElement('worktablesfbutton','getqrywherebutton')}
+ getFlds();
+ reFreshQryResultTable(); 
+ if (wheresdeleted !=0) {
+     if (!saveWhere()) {
+        displayForm('whereform');
+        forcewheresave=true;
+        alert(wheresdeleted+' lines were removed from the data filter definition'); 
+     }
+ } 
+}
+
+function tablerelClicked() {
+  readClickedRow();
+  if (eof) {return}
+  popUpContent('relpopupmenu'); ispop=false;
+
+}
+
+function selectField(nbr,tbl,crow) {
+ if (!tbl) {readClickedRow();}
+ else {
+      posTabCursor(tbl,crow);
+      readRow();
+      //readClickedRow(tbl);
+ }
+ if (eof) return;
+ var tab='stabl'+nbr; 
+ var fld='sfield'+nbr; 
+ var typ='stype'+nbr;
+ var tabval=valueOfCol(tab);
+ var fldval=valueOfCol(fld); 
+ var typval=valueOfCol(typ); 
+ var sel='ssel'+nbr;  
+
+ if  (valueOfCol(sel) == 'Y') {
+      changeCol(sel,'N');
+      setRowBgColor('white'); 
+      posTabCursor('tablesf','top');
+      readRow();
+      while (!eof) {
+             if (valueOfCol('sftabl')==tabval && valueOfCol('sffield')==fldval) {
+                 setRowAsClicked();
+                 removeSelectFld(tabval,fldval);
+                 break;
+             }
+             readRow(); 
+      }
+      reFreshQryResultTable(); 
+      return;
+ }
+
+
+ var als='salias'+nbr; 
+ var alsval=valueOfCol(als);
+ var dsc='sdesc'+nbr; 
+ var dscval=valueOfCol(dsc); 
+ var edt='sedit'+nbr;
+ var edtval=valueOfCol(edt); 
+ var wdth='swdth'+nbr;
+ var wdthval=valueOfCol(wdth);
+ var algn='salgn'+nbr;
+ var algnval=valueOfCol(algn); 
+ changeCol(sel,'Y'); 
+ //hideRow();
+ setRowBgColor('orange');
+ newRow('tablesf');
+ changeCol('sftabl',tabval); 
+ changeCol('sffield',fldval); 
+ changeCol('sfdesc',dscval);
+ changeCol('sfedit',edtval);
+ changeCol('sfwidth',wdthval); 
+ changeCol('sfalign',algnval);  
+ changeCol('sfalias',alsval);
+ changeCol('sftype',typval);
+
+ sortnbr++;
+ changeCol('sfsortnbr',sortnbr);
+ changeCol('sfsort',"<select name=sfsortsel"+sortnbr+" onchange='doresort=true'><option value=''></option><option value='A'>Ascend</option><option value='D'>Descend</option></select>");
+ if (typval!='numeric') {
+     changeCol('sfgroup',"<select name=sfgrpsel"+sortnbr+"><option value='G'>Group By</option><option value='count'>Count</option><option value='max'>Max</option><option value='min'>Min</option></select>");
+ }
+ else {
+     changeCol('sfgroup',"<select name=sfgrpsel"+sortnbr+"><option value='sum'>Sum</option><option value='avg'>Average</option><option value='count'>Count</option><option value='max'>Max</option><option value='min'>Min</option><option value='G'>Group By</option></select>");
+ }  
+ showElement('worktablesfbutton','getqrywherebutton')
+ reFreshQryResultTable(); 
+} 
+
+function reFreshQryResultTable() {
+ var j=-1; 
+ posTabCursor('tablesf','top');
+ table1.id=new Array();
+ table1.header=new Array();
+ table1.edit=new Array();
+ table1.align=new Array();
+ table1.width=new Array();
+ var descr;
+ var nbr;
+ var grp; 
+ readRow();
+ while (!eof) {
+  var fld=valueOfCol('sffield').trim();
+  eval('var obj=fullqryobj.'+valueOfCol('sftabl')); 
+  for (var i=0; i<obj.field.length; i++) {
+      if (obj.field[i].trim()==fld) {
+         j++;
+         table1.id[j]=(getFieldOrAlias(obj.field[i],obj.alias[i]));
+         //table1.header[j]='<span contenteditable ondblclick=workTablesf('+j+') onblur=saveFldDesc('+j+',this)>'+valueOfCol('sfdesc')+'</span>';
+         descr=stripSummary(valueOfCol('sfdesc'));
+         if (isCheckedVar('qrts')) {
+             nbr=valueOfCol('sfsortnbr');
+             grp=valueOf("sfgrpsel"+nbr);
+             if (grp != 'G') {
+                 descr=putSummary(descr,grp);
+             }
+         } 
+         table1.header[j]='<span contenteditable onblur=saveFldDesc('+j+',this)>'+descr+'</span>';
+         table1.edit[j]=valueOfCol('sfedit');
+         table1.width[j]=valueOfCol('sfwidth');
+         table1.align[j]=valueOfCol('sfalign');
+         break;
+      }
+  } 
+  
+  readRow() 
+ }
+
+ if (table1.id.length==0) {
+    changeContent('table1data','');
+    hideElement('worktablesfbutton','runuserqrybutton','getqrywherebutton'); 
+ }
+ else {
+   changeContent('table1data',applyTableDef(table1)); 
+   showElement('worktablesfbutton','runuserqrybutton','getqrywherebutton'); 
+ }
+ 
+ if (qrytables.length>0) {
+    //showElement('getqrywherebutton');
+ }
+ else {
+    hideElement('getqrywherebutton');
+    clearTable('tablewhere');
+ } 
+
+ if (table1.sqlresult !='') {
+ }
+ else {
+    hideElement('qrysummaryspan');
+ } 
+}
+
+
+function stripSummary(txt) {
+ var i=0;
+ for (i=0; i<sumar.length; i++) {
+      txt=txt.split(sumar[i]).join('');
+ }   
+ return txt;
+}
+
+
+function putSummary(txt,grp) {
+ return sumar[sumar2[grp]]+txt;
+}
+
+function saveFldDesc(nbr,obj) {
+ posTabCursor('tablesf',nbr);
+ readRow();
+ if (!eof) {
+    changeCol('sfdesc',obj.innerHTML);
+    //table1.header[nbr]='<span contenteditable ondblclick=workTablesf('+nbr+') onblur=saveFldDesc('+nbr+',this)>'+obj.innerHTML+'</span>';
+    table1.header[nbr]='<span contenteditable onblur=saveFldDesc('+nbr+',this)>'+obj.innerHTML+'</span>';
+    try {
+         table2.header[nbr]='<span contenteditable onblur=saveFldDesc('+nbr+',this)>'+obj.innerHTML+'</span>';
+    } catch(e) {}
+ } 
+}
+
+function saveFldLen(tabl,tabdef,nbr) {
+ posTabCursor('tablesf',nbr);
+ readRow();
+ if (!eof) {
+    changeCol('sfwidth',tabdef.width[nbr]);
+   //table1.header[nbr]='<span contenteditable onblur=saveFldDesc('+nbr+',this)>'+obj.innerHTML+'</span>';
+ } 
+}
+
+function saveFldLen2(tabl,tabdef,nbr) {
+ posTabCursor('tablesf',nbr);
+ readRow();
+ if (!eof) {
+ // table2.width[nbr]=tabdef.width[nbr]; 
+    changeCol('sfwidth',tabdef.width[nbr]);
+   //table1.header[nbr]='<span contenteditable onblur=saveFldDesc('+nbr+',this)>'+obj.innerHTML+'</span>';
+ } 
+}
+
+
+function moveSelectFld(how) {
+ readClickedRow('tablesf');
+ if (eof || ((how=='up' && currentrow==0) || (how=='down' && currentrow==rows.length-1))) return; 
+ var tabval=valueOfCol('sftabl');
+ var dscval=valueOfCol('sfdesc');
+ var fldval=valueOfCol('sffield');
+ var fldwidth=valueOfCol('sfwidth'); 
+ var fldedt=valueOfCol('sfedit');
+ var fldsrtnbr=valueOfCol('sfsortnbr');
+ var fldsrt=valueOfCol('sfsort:html');
+ var fldgrp=valueOfCol('sfgroup:html');
+ deleteRow();
+ if (how=='up') {newRow('tablesf',currentrow-1)};
+ else {newRow('tablesf',currentrow+1);}
+ changeCol('sftabl',tabval); 
+ changeCol('sfdesc',dscval); 
+ changeCol('sffield',fldval);
+ changeCol('sfwidth',fldwidth); 
+ changeCol('sfedit',fldedt); 
+ changeCol('sfsortnbr',fldsrtnbr);
+ changeCol('sfsort',fldsrt);
+ changeCol('sfgroup',fldgrp);
+ setRowAsClicked(); positionRow();
+ } 
+
+
+function removeSelectFld() {
+ readClickedRow('tablesf');
+ if (eof) return; 
+ var tabval=valueOfCol('sftabl');
+ var dscval=valueOfCol('sfdesc');
+ var fldval=valueOfCol('sffield').trim();
+ var crow=currentrow;
+ deleteRow();
+ //setRowBgColor('pink'); 
+ for (var i=0; i<4; i++) {
+     var tabl='dbtab'+i;
+     var stabl='stabl'+i;
+     var sfield='sfield'+i;
+     var salias='salias'+i;
+     posTabCursor(tabl,'top');
+     readRow();
+     if (!eof) {
+        if (valueOfCol(stabl)==tabval) {
+           while (!eof) {
+            if (fldval == valueOfCol(sfield).trim()) {
+               eval("changeCol('ssel"+i+"','N')");
+               setRowBgColor('white');
+               //showRow();
+               i=4;
+               break
+            }
+            readRow();
+          }
+        }
+     }  
+ }
+ posTabCursor('tablesf',crow);
+ readRow();
+ if (!eof) {setRowAsClicked()}
+ else {
+    posTabCursor('tablesf',crow-1);
+    readRow();
+    if (!eof) {setRowAsClicked(); positionRow()}
+ }
+       
+} 
+
+function runUserQry() {
+ //hideElement('nextpagebut','prevpagebut','paging'); 
+ pagecount=0;
+ posTabCursor('tablesf','top');
+ readRow();
+ if (eof) {
+    alert('No field was selected for query');
+    return;
+ }
+ if (qrytables.length>1) {
+    posTabCursor('tablerel','top'); 
+    readRow();
+    if (eof) {
+       alert('No relationship is established for selected tables');
+       return;
+    }
+    for (var i=0; i<qrytables.length; i++) {
+        var tablink=false;
+        posTabCursor('tablerel','top'); 
+        readRow();
+        while (!eof) {
+          if (valueOfCol('r1tabl')==qrytables[i] || valueOfCol('r2tabl')==qrytables[i]) {
+             tablink=true;
+             break;
+          }
+          readRow();
+        }
+        if (!tablink) {
+           alert('No relationship is established for table: '+qrytables[i]);
+           return;
+        }
+    }  
+ }
+ if (isCheckedVar('qrts')) {
+     if (!window.confirm('You are about to a run a query that will return Summary data')) {return false}
+ } 
+ showElement('divqueryresultwrap');
+ table2=new tableDef();
+ table2.tableid='qrytable2';
+ table2.rowselectcolor='';
+ table2.mouseovercolor=rowselectcolor;
+ table2.resizeablecolumns=true;
+ table2.onresizefunction="saveFldLen2";
+ table2.height=(document.getElementById('divqueryresultwrap').offsetHeight)*0.8;
+ //table2.height=700;
+ hideElement('divqueryresultwrap');
+ table2.sqlperpage=250;
+ table2.sqlrcdcnt=10000;
+ table2.sqlselect=buildQuery();
+ table2.sqlresult=''; 
+
+ for (var i=0; i<table1.id.length; i++) {
+      table2.header[i]=table1.header[i]; 
+      table2.width[i]=table1.width[i]; 
+      table2.edit[i]=table1.edit[i]; 
+      table2.align[i]=table1.align[i]; 
+      table2.style[i]=table1.style[i]; 
+      table2.id[i]=table1.id[i]+'_t2';
+ }
+
+ table2.onresizefunction="saveFldLen2";
+
+ changeContent('queryresult',applyTableDef(table2));
+ if (sqlrcdcnt==0) {
+      alert('No matching records found');
+      return false;
+ } 
+alert(sqlcommand); 
+ displayForm('queryresultwrap');
+
+ showElement('qrysummaryspan');
+ document.getElementById('nextpagebut').disabled=false;
+ document.getElementById('prevpagebut').disabled=false;
+
+ if (sqlrcdcnt==numeric(table2.sqlrcdcnt)) {
+     say('The data returned was limited to '+sqlrcdcnt+' Records');
+ }
+ if (numeric(table2.sqlperpage)!=0) {
+     if ((table2.sqlstart+table2.sqlperpage)>=table2.sqltotcnt) {
+         document.getElementById('nextpagebut').disabled=true;
+     } 
+     if ((table2.sqlstart-table2.sqlperpage)<0) {
+         document.getElementById('prevpagebut').disabled=true;
+     } 
+     var ratio=(''+numeric(table2.sqltotcnt/table2.sqlperpage,5)).split('.'); 
+     pagecount=numeric(ratio[0]);
+     if (ratio.length>1) {pagecount += 1} 
+     changeContent('paging','Page 1 of '+pagecount);
+     showElement('paging');
+     if (pagecount>1) {
+         showElement('nextpagebut','prevpagebut');  
+     }
+  }
+
+
+}
+
+
+</script>
+
+<script>
+function setRelationship() {
+ var nbr=0;
+ changeContent('reltxt','');
+ reltab1='';
+ relfld1='';
+ reltab2='';
+ relfld2='';
+ relnbr1=0;
+ relnbr2=0;
+ reldsc1='';
+ reldsc2='';
+
+ changeContent('rt1',''); changeContent('rt2',''); changeContent('rt3',''); changeContent('rt4','');
+ for (var x=0; x<qrytables.length; x++) {
+   var dbtable=qrytables[x];
+   nbr +=1;
+   var rtbl="rdbtab"+nbr;
+   eval("var "+rtbl+"=clone(tablesel)");
+   eval("tobj="+rtbl);
+   tobj.tableid=rtbl;
+   for (i=0; i<tobj.id.length; i++) {
+        tobj.id[i]='r'+tobj.id[i]+nbr;
+   } 
+   eval("tobj.tableonclick='selectRelField("+nbr+")'"); 
+   var txt=applyTableDef(tobj); 
+   var clmn="rt"+nbr;
+   changeContent(clmn,txt);
+   var obj='';
+   eval('obj=fullqryobj.'+dbtable);
+   for (i=0; i<obj.field.length; i++) {
+       newRow(rtbl);
+       eval("changeCol('rstabl"+nbr+"',dbtable)");
+       eval("changeCol('rsfield"+nbr+"',obj.field[i])");
+       eval("changeCol('rsdesc"+nbr+"',obj.desc[i])");
+       eval("changeCol('rsalias"+nbr+"',obj.alias[i])");
+   }
+  }
+  displayForm('relform');
+} 
+
+
+function selectRelField(nbr) {
+ readClickedRow();
+ if (eof) return;
+ var rstabl='rstabl'+nbr;
+ var rsfield='rsfield'+nbr;
+ var rsdesc='rsdesc'+nbr;
+ rstabl=valueOfCol(rstabl);
+ rsfield=valueOfCol(rsfield);
+ rsdesc=valueOfCol(rsdesc); 
+ if (relnbr1==0 || relnbr1==nbr) {
+    reltab1=rstabl;
+    relfld1=rsfield;
+    reldsc1=rsdesc;
+    relnbr1=nbr;
+ }
+ else {
+    if (nbr>relnbr1 || nbr==relnbr2) {
+       reltab2=rstabl;
+       relfld2=rsfield;
+       reldsc2=rsdesc;
+       relnbr2=nbr; 
+    }
+    else {
+        if (nbr<relnbr1)
+           reltab2=reltab1;
+           relfld2=relfld1;
+           reldsc2=reldsc1
+           relnbr2=relnbr1;
+           reltab1=rstabl;
+           relfld1=rsfield;
+           reldsc1=rsdesc;
+           relnbr1=nbr; 
+    }
+ }
+
+ changeContent('reltxt',reltab1+':'+reldsc1+'<===>'+reltab2+':'+reldsc2); 
+}
+
+function saveRelationship() {
+ if (relnbr1==0 || relnbr2==0) {
+    alert('A relationship has not been defined');
+    return; 
+ }
+ if (getFieldAttr(relfld1).type != getFieldAttr(relfld2).type) {
+    alert('field types do not match. A relationship cannot be established');
+    return;  
+ } 
+ newRow('tablerel');
+ changeCol('r1tabl',reltab1);
+ changeCol('r1field',relfld1);
+ changeCol('r2tabl',reltab2);
+ changeCol('r2field',relfld2);
+ changeCol('rdesc',contentOf('reltxt'));
+ closeForm();
+}
+
+
+function deleteRelationship() {
+  if (!window.confirm('Select OK Confirm removal of the relationship or Cancel to quit')) {return}  
+  deleteRow();
+  posTabCursor('tablerel','top');
+  readRow();
+  if (eof) {
+      changeContent('tablereldata',applyTableDef(tablerel));
+  }
+}  
+
+
+function getQryWhere() {
+ posTabCursor('tablewhere','top');
+ readRow();
+ if (eof) {newWhere()}; 
+ tablewheredatabk=tablewheredata.innerHTML; 
+ displayForm('whereform'); 
+}
+
+function newWhere() {
+  if (!fullqryobj) {
+     alert('No table has yet been selected');
+     return;
+  } 
+  var fldarray=new Array;
+  var len, blk;
+  fldarray[0]=' ^ : ';
+  var j=0;
+  var txt=''; 
+  for (property in fullqryobj) {
+      eval('obj=fullqryobj.'+property);
+      for (i=0; i<obj.field.length; i++) {
+          //if (qrytables.length==1) {
+          //    txt=property+'^'+obj.field[i]+':'+obj.desc[i].sst(1,20);
+          //}
+          //else {
+              len=obj.desc[i].sst(1,20).trim().length;
+              blk='';
+              for (var i2=len; i2<=22; i2++) {
+                  blk += '_';
+              } 
+              blk += '_'
+              txt=property+'^'+obj.field[i]+':'+obj.desc[i].sst(1,20)+blk+' ('+property+')';
+          //}
+          j++;
+          fldarray[j]=txt;
+      }
+  }
+  newRow('tablewhere');
+  var i=currentrow; 
+  changeCol('wremove','<input type=checkbox onclick="readClickedRow(); deleteRow()">');
+  changeCol('woc1',"<select name=dwoc1"+i+"></select>");
+  changeCol('woc2',"<select name=dwoc2"+i+"></select>"); 
+  changeCol('woc3',"<select name=dwoc3"+i+"></select>");
+  if (i>0) {
+     changeCol('wandor',"<select name=dwandor"+i+"></select>");
+  }
+  else {
+     changeCol('wandor',"<select name=dwandor"+i+" style='display:none'></select>");
+  }
+  changeCol('wfld',"<select name=dwfld"+i+" style='background-color:#d5e2f0; font-family:courier new; font-size:12'></select>");
+  changeCol('wval',"<input name=dwval"+i+" size=24>/<br><select name=dwvalfld"+i+" style='background-color:#d5e2f0; font-family:courier new; font-size:12'></select>");
+  changeCol('wcmp',"<select name=dwcmp"+i+" onchange=checkSelectCmp(this,"+i+")></select>");
+  changeCol('wcc1',"<select name=dwcc1"+i+"></select>");
+  changeCol('wcc2',"<select name=dwcc2"+i+"></select>"); 
+  changeCol('wcc3',"<select name=dwcc3"+i+"></select>");
+
+  var sltarray=['','(',')'];
+  eval("loadSelect('dwoc1"+i+"',sltarray)");  
+  eval("loadSelect('dwoc2"+i+"',sltarray)");
+  eval("loadSelect('dwoc3"+i+"',sltarray)");
+  eval("loadSelect('dwcc1"+i+"',sltarray)");  
+  eval("loadSelect('dwcc2"+i+"',sltarray)");
+  eval("loadSelect('dwcc3"+i+"',sltarray)");
+  if (i>0) {sltarray=["and","or"];}
+  else {sltarray=[' '];}
+  eval("loadSelect('dwandor"+i+"',sltarray)");
+  sltarray=['=:Equal','<:Less than','>:Greater than','<=:Less than or Equal','>=:Greater than or Equal','<>:not Equal','empty:is Empty','<>:not Equal','notempty:is Not Empty','like:like']; 
+  eval("loadSelect('dwcmp"+i+"',sltarray)"); 
+
+  eval("loadSelect('dwfld"+i+"',fldarray)"); 
+  eval("loadSelect('dwvalfld"+i+"',fldarray)");   
+}
+
+
+function checkSelectCmp(obj,i) {
+  var val=document.getElementById('dwval'+i);
+  var valfld=document.getElementById('dwvalfld'+i);
+  if (obj.value=='empty' || obj.value=='notempty') {
+      val.value=""; 
+      valfld.value=" ^ ";
+      val.style.visibility="hidden";
+      valfld.style.visibility="hidden";
+  }
+  else {
+      val.style.visibility="visible";
+      valfld.style.visibility="visible";
+  } 
+}
+
+
+function validWhere() {
+  var dwfld='';
+  var dwvalfld='';
+  var dwval='';
+  var i=0;
+  posTabCursor('tablewhere','top');
+  readRow();
+  while (!eof) {
+    i=currentrow;
+    dwfld='dwfld'+i;
+    dwvalfld='dwvalfld'+i;
+    dwval='dwval'+i;
+    if (isBlank(valueOf(dwfld))) {
+       alert('Select the field to compare');
+       focusOn(dwfld);
+       return false;
+    } 
+
+    dwvalfld=valueOf(dwvalfld); 
+    dwval=valueOf(dwval);
+    dwcmp=valueOf('dwcmp'+i); 
+    if ((dwvalfld==' ^ ' && isBlank(dwval) && dwcmp !='empty' && dwcmp !='notempty') || (dwvalfld != ' ^ ' && (!isBlank(dwval)))) {
+       alert('Enter Comparison Value OR Field');
+       focusOn(('dwval'+i));
+       return false;
+    } 
+    var dwvalfldfld=dwvalfld.split('^')[1]; 
+    dwfld=valueOf(dwfld).split('^')[1];
+    if (dwvalfld != ' ^ ') {
+       if (getFieldAttr(dwvalfldfld).type != getFieldAttr(dwfld).type) {
+           alert('field types do not match. Comparison not valid');
+           focusOn(('dwfld'+i));
+           return false;
+       }  
+    }
+    if (dwvalfld != ' ^ ') {
+       if (dwvalfldfld == dwfld) {
+           alert('Comparision fields are the same'); 
+           focusOn(('dwfld'+i));
+           return false;
+       }  
+    }
+    if (dwcmp=='empty' || dwcmp=='notempty' || dwcmp=='like') {
+        if (getFieldAttr(dwfld).type != 'char') {
+            alert('Comparison "'+dwcmp+'" is only applicable to alphanumeric fields');
+            focusOn('dwcmp'+i);
+            return false;
+        } 
+    }
+    readRow();
+  } 
+  return true; 
+}
+
+
+
+function saveWhere() {
+ if (!validWhere()) return false;
+  var dwandor='';
+  var dwfld='';
+  var dwtabfld=''; 
+  var dwvalfld='';
+  var dwval='';
+  var dwoc1=''; 
+  var dwoc2=''; 
+  var dwoc3=''; 
+  var dwcmp=''; 
+  var dwcc1=''; 
+  var dwcc2=''; 
+  var dwcc3=''; 
+  var i=0;
+  var txt='';
+  var fldtype='';
+  var result='';
+  posTabCursor('tablewhere','top');
+  readRow();
+  while (!eof) {
+    i=currentrow;
+    dwandor='dwandor'+i;
+    dwfld='dwfld'+i;
+    dwvalfld='dwvalfld'+i;
+    dwval='dwval'+i;
+    dwcmp='dwcmp'+i; 
+    dwoc1='dwoc1'+i;
+    dwoc2='dwoc2'+i;
+    dwoc3='dwoc3'+i;
+    dwcc1='dwcc1'+i;
+    dwcc2='dwcc2'+i;
+    dwcc3='dwcc3'+i; 
+    dwvalfld=valueOf(dwvalfld).split('^'); 
+    dwtabfld=valueOf(dwfld).split('^')[0]+'.'+valueOf(dwfld).split('^')[1]; 
+    dwfld=valueOf(dwfld).split('^')[1];
+    if (isBlank(dwvalfld[1])) {
+        fldtype=getFieldAttr(dwfld).type; 
+        if (fldtype=='char') {result=valueOf(dwval).sqlWrap()}
+        else {result=numValueOf(dwval)};
+    } 
+    else {
+         result=dwvalfld[0]+'.'+dwvalfld[1]; 
+    } 
+    var dwcmpvalue=valueOf(dwcmp); 
+
+    if (dwcmpvalue=='empty') {
+        dwcmpvalue="=' '";
+        result='';
+    }   
+    if (dwcmpvalue=='notempty') {
+        dwcmpvalue="<>' '";
+        result='';
+    } 
+    txt += valueOf(dwandor)+" "+valueOf(dwoc1)+valueOf(dwoc2)+valueOf(dwoc3)+dwtabfld+" "+dwcmpvalue+" "+result+valueOf(dwcc1)+valueOf(dwcc2)+valueOf(dwcc3)+" "; 
+    readRow(); 
+  }
+
+ if (txt) {
+    var qtxt=buildQuery(txt); 
+    if (!sqlSelect(qtxt,'$s',1)) {
+       alert('Syntax of filter not correct'); 
+       delete $s;
+       return false;
+    }
+    delete $s; 
+ }
+ wherecondition=txt; 
+ closeForm();
+ tablewheredatabk='';
+ forcewheresave=false;
+ return true; 
+}
+
+
+function workTablesf(nbr) {
+ doresort=false;
+ tablesfdatabk=tablesfdata.innerHTML;
+ selectedtablesspanbk=selectedtablesspan.innerHTML; 
+
+ //var colname='tablesf$ha7'; 
+ if (isCheckedVar('qrtd')) {
+     hideElement('tablesf$ha7','tablesf$hb7');
+ }
+ else {
+     showElement('tablesf$ha7','tablesf$hb7');
+ }
+ //posTabCursor('tablesf','top');
+ //readRow(); 
+ //while (!eof) {
+   //hideRow('sffield'); 
+   //readRow();
+ //}
+
+
+
+
+ if (!nbr) {var nbr=0}; 
+ posTabCursor('tablesf',nbr);
+ readRow(); 
+ if (!eof) {
+    setRowAsClicked(); 
+ }
+ displayForm('tablesfform');
+ if (!eof) {
+    positionRow();
+ } 
+}
+
+function exitTablesf() {
+  if (window.confirm('Do you wish to save the selected fields?\n\nPress OK to save or Cancel not to save')) {
+     saveTablesf();
+     return;
+ } 
+ changeContent('tablesfdata',tablesfdatabk);
+ changeContent('selectedtablesspan',selectedtablesspanbk); 
+ formatTable('tablesf'); 
+ tablesfdatabk=''; dbtabdatabk='';
+ closeForm();
+}
+
+function saveTablesf() {
+ reFreshQryResultTable(); 
+ closeForm();
+ tablesfdatabk=''; dbtabdatabk='';
+}
+
+function exitWhere() {
+ if (forcewheresave==true) {
+    saveWhere()
+    return;
+ }
+ if (window.confirm('Do you wish to save the data filter?\n\nPress OK to save or Cancel not to save')) {
+     saveWhere();
+     return;
+ } 
+ changeContent('tablewheredata',tablewheredatabk);
+ tablewheredatabk='';
+ closeForm();
+}
+
+
+function getQryPage(what) {
+  changeContent('queryresult',applyTableDef(table2,what));
+  document.getElementById('nextpagebut').disabled=false;
+  document.getElementById('prevpagebut').disabled=false;
+
+  if ((table2.sqlstart+table2.sqlperpage)>=table2.sqltotcnt) {
+     document.getElementById('nextpagebut').disabled=true;
+  }
+  if ((table2.sqlstart-table2.sqlperpage)<0) {
+     document.getElementById('prevpagebut').disabled=true;
+  }
+  changeContent('paging','Page '+((table2.sqlstart/table2.sqlperpage) +1)+' of '+pagecount);
+}
+
+function exportToExcel() {
+  displayForm('exportform');
+  focusOn('expfile');
+}
+
+function doExport() {
+  var headers=new Array();
+  var i=0;
+  for (i=0; i<table2.header.length; i++) {
+       headers.push(table2.header[i]);
+       table2.header[i]=table2.header[i].split('>')[1].split('<')[0]; 
+  }
+  try {
+      var outfile=queryfilepath+valueOf('expfile')+'.csv';
+      sendToPcFile(outfile,sqlSelectResultToCsv($r,table2),isCheckedVar('openfile'));
+  } catch(e) {};
+  for (i=0; i<table2.header.length; i++) {
+       table2.header[i]=headers[i]; 
+  }
+  closeForm();
+}
+
+</script>
+
+<script>
+
+function saveDefinition() {
+  displayForm('saveform',xpos,ypos);
+  focusOn('savefile');
+}
+
+function doSaveDefinition() {
+  var outfile=querydefinitionpath+valueOf('savefile').trim()+".qdf"; 
+  if (pcFileExists(outfile)) {
+     if (!window.confirm('Query Definition: '+valueOf('savefile')+' already exists\n\n Do you wish to replace it?')) {
+        return;
+     }
+  }
+
+ //var txt="function $import$data() {fieldlist=new Object();\n";
+ //var txt="fieldlist=new Object();\n";
+ var txt="fieldlist=new Object();";
+ var i=0;
+ var colid;
+ var tabcount=0;
+ var tc;
+ var property
+ var tablesused=new Object();
+
+ for (i=0; i<tablesf.id.length; i++) {
+      colid=tablesf.id[i];
+      txt += 'fieldlist["'+colid+'"]=[';
+      posTabCursor('tablesf','top');
+      readRow();
+      while (!eof) {
+             if (!tablesused[valueOfCol('sftabl')]) {tablesused[valueOfCol('sftabl')]=true; tabcount ++;}
+             if (colid == 'sfsort') {
+                 nbr=valueOfCol('sfsortnbr');
+                 txt += '"'+valueOf('sfsortsel'+nbr)+'"';
+             }
+             else {
+                if (colid == 'sfgroup') {
+                    nbr=valueOfCol('sfsortnbr');
+                    txt += '"'+valueOf('sfgrpsel'+nbr)+'"';
+                }
+                else {
+                    txt += '"'+valueOfCol(colid)+'"';
+                }
+             }
+             if (moreRow()) {txt += ","}
+             readRow();
+      }
+      txt += "];"; //txt += "];\n";
+ }
+
+ txt += "relationshiplist=new Object();"; //txt += "relationshiplist=new Object();\n"; 
+ for (i=0; i<tablerel.id.length; i++) {
+      colid=tablerel.id[i];
+      txt += 'relationshiplist["'+colid+'"]=[';
+      posTabCursor('tablerel','top');
+      readRow();
+      while (!eof) {
+             if (!tablesused[valueOfCol('r1tabl')]) {tablesused[valueOfCol('r1tabl')]=true; tabcount ++;}
+             txt += '"'+valueOfCol(colid)+'"';
+             if (moreRow()) {txt += ","}
+             readRow();
+      }
+      txt += "];"; //txt += "];\n";
+ }
+
+ if (isCheckedVar('qrtd')) {txt += "$querytype='D';"}
+ else {txt += "$querytype='S';"}
+
+ txt += "tableslist=[";
+ tc=0;
+ for (property in tablesused) { 
+      txt += '"'+property+'"';
+      tc++;
+      if (tc != tabcount) {txt += ","}
+ }
+ txt += "];"; //txt += "];\n"; 
+
+
+ txt += "filterlist=new Object();"; //txt += "filterlist=new Object();\n";
+ for (i=0; i<tablewhere.id.length; i++) {
+      colid=tablewhere.id[i];
+      if (colid=='wremove') {continue}
+      txt += 'filterlist["'+colid+'"]=[';
+      posTabCursor('tablewhere','top');
+      readRow();
+      while (!eof) {
+             if (colid=='wval') {
+                 txt += '"'+valueOf('d'+colid+currentrow)+'@^@^'+valueOf('d'+colid+'fld'+currentrow)+'"';  
+             } 
+             else {txt += '"'+valueOf('d'+colid+currentrow)+'"';}
+             if (moreRow()) {txt += ","}
+             readRow();
+      }
+      txt += "];"; //txt += "];\n";
+ }
+
+ deletePcFile(outfile);
+ sendToPcFile(outfile,txt);
+ closeForm();
+ //alert('Query Definition saved');
+}
+
+
+function closeQryForm() {
+  var i=0;
+  closeForm(); 
+  for (i=0; i<table2.id.length; i++) {
+       table1.width[i]=table2.width[i];
+       table1.header[i]=table2.header[i]; 
+  } 
+  changeContent('table1data',applyTableDef(table1)); 
+}
+
+</script>
+
+<!---%displays%--->
+
+
+<div id="divexportform" class="window" style="display:none; width:500">
+<form name="exportform">
+<span class=label style="color:blue">Excel File to Export to</span><br><br>
+<b><span id=qfilepath></span><input name=expfile type=text size=20 maxlength=50><b>.csv<b>
+<br><br> 
+<span class=label>Open file after Export?</span>
+<input name=openfile id=openfile type=checkbox checked>
+<br><br><br>
+<button onclick=exeFunction('doExport()')>Export</button>&nbsp<button onclick=closeForm()>Cancel</button>
+</form>
+</div>
+
+<div id="divsaveform" class="window" style="display:none">
+<form name="saveform">
+<div class="titleBar">Save Query Definition</div>
+<span class=label>Name</span>&nbsp<br>
+<input name=savefile type=text size=35 maxlength=50>
+<br><br><br>
+<button onclick=exeFunction('doSaveDefinition()')>Save</button>&nbsp<button onclick=closeForm()>Cancel</button>
+</form>
+</div>
+
+<div id=filelist style="position:absolute; display:none; height:240; overflow-y:auto; background-color:#f3c792; border:2px solid"></div>
+
+<span id=displayarea style="display:none">
+<div id=pageheader style="display:none"></div>
+
+      <div  id=pagebottomleft style="width:255; margin-top:0; padding-top:0">
+        <span id=saveload>
+         <button onclick=saveDefinition()>Save</button>
+         <button onclick=importDefinition()>Load</button>
+        </span>
+        <div id=dbtabdata style="margin-top:5;"></div>
+        <br><br>
+        <span id=qrydatatype>
+           <span class=label style="font-size:102%; color:blue">Query Result Type</span><br>
+           <input type=radio name=qryrslttyp id=qrtd style="margin-left:40" onclick="reFreshQryResultTable()"><span class=label>Details</span><br>
+           <input type=radio name=qryrslttyp id=qrts style="margin-left:40" onclick="reFreshQryResultTable()"><span class=label>Summary</span><br><br>
+        </span> 
+        <span id=relspan>
+          <button onclick="displayForm('relationship')">Relationship</button> 
+          <br><br>
+        </span>
+        <button id=worktablesfbutton onclick=workTablesf()>Selected Fields</button>
+        <br> 
+        <br>
+        <button id=getqrywherebutton onclick=getQryWhere()>Data Filter</button>
+        <br>
+        <br> 
+        <button id=runuserqrybutton onclick=exeFunction('runUserQry()')>Run Query</button>
+        <br>
+      </div>
+ 
+<div id="pagebottomright" style="margin-top:0; padding-top:0">
+             <div id=selectedtablesspan style="background-color:a6fdd9; overflow:auto; margin-bottom:0; margin-bottom:5; padding-bottom:0; height:290; border:4px solid white; padding:4px">
+                 <table cellpadding=10><col width=250><col width=250><col width=250><col width=250>
+                   <tr>
+                     <td id=t1></td><td id=t2></td><td id=t3></td><td id=t4></td>
+                   </tr>
+                </table>
+             </div>
+
+             <div id=table1data style="width:100%; margin-top:5; padding-top:0; overflow-x:auto;"></div>
+
+</div>
+
+<div id=divtablesfform class=window style="display:none">
+ <form name=tablesfform>
+ <div class=titlebar></div> 
+ <span button=exittablesf type=exit class=ximage onclick="exitTablesf()"></span>
+ <div id=tablesfdata></div>
+ <br>
+ <span class=buttonarea> 
+  <button onclick=saveTablesf()>Save</button>&nbsp 
+  <button onclick=moveSelectFld('up')>Move-Up</button>&nbsp
+  <button onclick=moveSelectFld('down')>Move-Down</button>
+  <button onclick=removeSelectFld()>Remove</button> 
+  <button onclick="exitTablesf()">Exit</button>  
+ </span>
+</form>
+</div>
+
+
+<div id=divrelform class=window style="display:none">
+<form name=relform>
+  <table><tr style="margin:2px">
+    <td id=rt1></td><td id=rt2></td><td id=rt3></td><td id=rt4></td>
+    </tr>
+ </table>
+<div id=reltxt style="color:green;font-weight:600; font-size:15"></div>
+<br>
+<button onclick="saveRelationship()">Save</button>
+<button onclick="closeForm()">Exit</button>
+</form>
+</div>
+
+<div id=divwhereform class=window style="display:none">
+<form name=whereform>
+<div class="titleBar"></div>
+<span button=exitwhere type=exit class=ximage onclick="exitWhere()"></span>
+<span id=exitbutton class="ximage" onclick="closeForm()"></span>
+<div id=tablewheredata></div>
+<button onclick="newWhere()">Add a line</button>
+<button onclick="saveWhere()">Save</button>
+<button onclick="exitWhere()">Exit</button>
+</form>
+</div>
+
+<div id=divqueryresultwrap style="display:none; width=90%; height:90%; overflow-x:auto" class=window nomove>
+ <form name=queryresultwrap>
+  <div class="titleBar"></div>
+  <span button=exitbutton2 type=exit class="ximage" onclick="closeQryForm()"></span>
+  <div id=qrysummaryspan style="margin:10">
+    <button id=exportbut onclick="exportToExcel()">Export To Excel</button>&nbsp&nbsp&nbsp
+    <button id=prevpagebut onclick="getQryPage('previous')">Previous Page</button>&nbsp
+    <button id=nextpagebut onclick="getQryPage('next')">Next Page</button>
+    <span id=paging style="position:absolute; font-weight:600; font-size=130%; top=20; right:10"></span>
+  </div>
+  <div id=queryresult style="margin-left:10; margin-right:10; width:100%; overflow-x:auto"></div>
+ </form> 
+</div>
+
+<div id=divrelationship style="display:none" class=window>
+ <form name=relationship>
+  <div class="titleBar"></div>
+  <span button=exitrelation type=exit class="ximage" onclick="closeForm()"></span>
+  <div id=tablereldata></div>
+  <br><br> 
+  <button onclick="setRelationship()">New Relationship</button> 
+  <br><br>
+ </form>
+</div>
+
+
+<div id=relpopupmenu style="display:none" class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td onclick="deleteRelationship()" onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Remove Relationship 
+</td></tr></table>
+</div>
+
+
+
+</div>
+
+
+<!---%end%--->
+</body>
+</html>

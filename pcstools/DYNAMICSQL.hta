@@ -1,0 +1,368 @@
+<hta:
+   windowState="maximize"
+>
+
+<html>
+<head><title>Dynamic SQL</title></head>
+<body style="padding:10px;" onload=exeFunction('loadUp()')>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type="text/JavaScript" src="../applications/startup.js"></script>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+
+<script>
+
+<!---%scripts%--->
+
+function loadUp() {
+
+ selectbatch=''; 
+ rcdcnt='2000';
+ perpage='';
+ pagecount=0;
+
+ fieldstable=new tableDef();
+ fieldstable.id=['t#field','t#desc']; 
+ fieldstable.tablestyle="cursor:hand"; 
+ fieldstable.tableonclick='fieldsTableClicked()';
+ fieldstable.tableid='fieldstable';
+ fieldstable.header=['Field Name','Description'];
+ fieldstable.width=[100,300]; 
+ changeContent('fieldsdiv',applyTableDef(fieldstable));
+
+ tabhis=new tableDef();
+ tabhis.tableid='histab';
+ tabhis.tableonclick='tabhisClicked()';
+ tabhis.header=['Statements'];
+ tabhis.id=['t#statements'];
+ tabhis.width=[480];
+ changeContent('qryhistorydiv',applyTableDef(tabhis));
+
+ var tabar=new Array();
+ var tabar2=new Array();
+ for (property in dataDic.table) {
+      var obj=getDbTableAttr(property);
+      tabar.push(obj.desc+'^'+property);
+      tabar2.push(property+'^'+obj.desc);
+ } 
+
+ tabar.sort(); 
+ var tabar3=new Array();
+ var i=0;
+ var tabattr='';
+ for (i=0; i<tabar.length; i++) {
+      tabattr=tabar[i].split('^');
+      tabar3.push(tabattr[1]+':'+tabattr[0]);
+ } 
+ loadSelect('qtable',tabar3,' ');  
+
+ tabar2.sort(); 
+ tabar3=new Array();
+ i=0;
+ tabattr='';
+ for (i=0; i<tabar2.length; i++) {
+      tabattr=tabar2[i].split('^');
+      tabar3.push(tabattr[1]+':'+tabattr[0]);
+ } 
+ loadSelect('qtable2',tabar3,' '); 
+ focusOn('sqltxt');
+ hideElement('nextpagebut','prevpagebut','sendtoexcel','paging');  
+}
+
+
+function runQuery() {
+  pagecount=0;
+  nextpagebut.disabled=false;
+  prevpagebut.disabled=false;
+  hideElement('nextpagebut','prevpagebut','sendtoexcel','paging');  
+  if (isBlank(valueOf('sqltxt'))) {
+      alert('Enter SQL Select statement');
+      focusOn('sqltxt');
+      return;
+  } 
+  //if (!sqlSelect(valueOf('sqltxt'),'$s')) {alert(sqlerr); return}
+  tabl=new tableDef();
+  tabl.tableid='table1';
+  tabl.dbref=true;
+  tabl.mouseovercolor=rowselectcolor;
+  tabl.resizeablecolumns=true;
+  tabl.height=500;
+  tabl.sqlselectbatch=selectbatch;
+  tabl.sqlrcdcnt=rcdcnt;
+  tabl.sqlperpage=perpage;
+  tabl.sqlselect=valueOf('sqltxt');
+  //setSqlSelectResult(tabl,$s);
+  showElement('sqldiv');
+  changeContent('sqldiv',applyTableDef(tabl));
+  say('');
+  if (sqlerr) {
+      hideElement('sqldiv');
+      delete $r;
+      return
+  }
+  if (sqlrcdcnt==0) {
+      alert('No matching record found');
+      return;
+  }
+  if (sqlrcdcnt==numeric(tabl.sqlrcdcnt)) {
+      say('The data returned was limited to '+sqlrcdcnt+' Records');
+  }
+  if (numeric(tabl.sqlperpage)!=0) {
+      showElement('nextpagebut','prevpagebut');  
+      tabl.sqlresult=$r;
+      if ((tabl.sqlstart+tabl.sqlperpage)>=tabl.sqltotcnt) {
+          nextpagebut.disabled=true;
+      } 
+      if ((tabl.sqlstart-tabl.sqlperpage)<0) {
+          prevpagebut.disabled=true;
+      } 
+      var ratio=(''+numeric(tabl.sqltotcnt/tabl.sqlperpage,5)).split('.'); 
+      pagecount=numeric(ratio[0]);
+      if (ratio.length>1) {pagecount += 1} 
+      changeContent('paging','Page 1 of '+pagecount);
+      showElement('paging');
+  }
+  showElement('sendtoexcel');
+  posTabCursor('histab',0);
+  readRow();
+  if (!eof) {
+      if (valueOfCol('t#statements') != valueOf('sqltxt')) { 
+          newRow('histab','0');
+          changeCol('t#statements',valueOf('sqltxt'));
+      }
+  }
+  else {
+        newRow('histab','0');
+        changeCol('t#statements',valueOf('sqltxt'));
+  }
+}
+
+function checkAtCursor() {
+  var ex=event.x; 
+  var ey=event.y; 
+  var tr=document.getElementById('sqltxt').createTextRange();
+  tr.moveToPoint(ex,ey);
+  tr.expand("word"); 
+  if (tr.text) { 
+     if (getDbFields(tr.text)) {
+         changeVar('selectedfields','');
+         showElement('fieldswrap');
+     }
+  }
+}
+
+
+function getDbFields(dbtable) {
+   dbtable=dbtable.trim();
+   var n=0;
+   var i=0;
+   var obj=getDbTableAttr(dbtable);
+   if (obj) {
+       var fields=obj.field.split(','); 
+   }
+   else {
+       alert('Table '+dbtable+' does not exists');
+       return false;
+   } 
+   var fobj=new sqlSelectResult('field','desc');
+   for (i=0; i<fields.length; i++) {
+       obj=getFieldAttr(fields[i]);
+       n=addSqlSelectRow(fobj);
+       fobj.field[n]=fields[i];
+       fobj.desc[n]=obj.desc;
+   }
+   sqlerr=''; 
+   setSqlSelectResult(fieldstable,fobj); 
+   changeContent('fieldsdiv',applyTableDef(fieldstable));
+   changeVar('qtable',dbtable);
+   changeVar('qtable2',textOfSelect('qtable'));  
+   return true;
+ }
+
+function getDbFields2() {
+   dbtable=textOfSelect('qtable2');
+   var n=0;
+   var i=0;
+   var obj=getDbTableAttr(dbtable);
+   if (obj) {
+       var fields=obj.field.split(','); 
+   }
+   else {
+       alert('Table '+dbtable+' does not exists');
+       return false;
+   } 
+   var fobj=new sqlSelectResult('field','desc');
+   for (i=0; i<fields.length; i++) {
+       obj=getFieldAttr(fields[i]);
+       n=addSqlSelectRow(fobj);
+       fobj.field[n]=fields[i];
+       fobj.desc[n]=obj.desc;
+   }
+   sqlerr=''; 
+   setSqlSelectResult(fieldstable,fobj); 
+   changeContent('fieldsdiv',applyTableDef(fieldstable));
+   changeVar('qtable',dbtable);
+   return true;
+ }
+
+function fieldsTableClicked() {
+ readClickedRow();
+ if (eof) {return}
+ var flist=valueOf('selectedfields');
+ if (isBlank(flist)) {changeVar('selectedfields',valueOfCol('t#field'))}
+ else { 
+    changeVar('selectedfields',flist+', '+valueOfCol('t#field')); 
+ }
+ var obj=document.getElementById('selectedfields');
+ obj.select();
+ obj=obj.createTextRange();
+ obj.execCommand("copy");
+}
+
+
+function fieldList() {
+ if (isVisible('fieldswrap')) {hideElement('fieldswrap')}
+ else {showElement('fieldswrap')} 
+ changeVar('selectedfields',''); 
+}
+
+function queryParameters() {
+  changeVar('sqlselectbatch',selectbatch);
+  changeVar('sqlrcdcnt',rcdcnt);
+  changeVar('sqlperpage',perpage);  
+  displayForm('qryparms',100,60);
+} 
+
+
+function saveParms() {
+  if (valueOf('sqlselectbatch')==0) {selectbatch=''};
+  else {selectbatch=valueOf('sqlselectbatch')}
+ 
+  if (valueOf('sqlrcdcnt')==0) {rcdcnt=''};
+  else {rcdcnt=valueOf('sqlrcdcnt')} 
+
+  if (valueOf('sqlperpage')==0) {perpage=''};
+  else {perpage=valueOf('sqlperpage')}
+
+  hideElement('nextpagebut','prevpagebut','sendtoexcel','paging');
+  say('');  
+  changeContent('sqldiv','');
+  closeForm();
+}
+
+
+function queryHistory() {
+ if (isVisible('qryhistorywrap')) {hideElement('qryhistorywrap')}
+ else {showElement('qryhistorywrap');}
+}
+
+function tabhisClicked() {
+ readClickedRow();
+ if (eof) {return}
+ changeVar('sqltxt',valueOfCol('t#statements'));
+ //hideElement('qryhistorywrap');
+}
+
+function getQryPage(what) {
+ changeContent('sqldiv',applyTableDef(tabl,what));
+ nextpagebut.disabled=false;
+ prevpagebut.disabled=false;
+ if ((tabl.sqlstart+tabl.sqlperpage)>=tabl.sqltotcnt) {
+     nextpagebut.disabled=true;
+ }
+ if ((tabl.sqlstart-tabl.sqlperpage)<0) {
+     prevpagebut.disabled=true;
+ }
+ changeContent('paging','Page '+((tabl.sqlstart/tabl.sqlperpage) +1)+' of '+pagecount);
+}
+
+
+function exportToExcel() {
+  displayForm('exportform');
+  focusOn('expfile');
+}
+
+function doExport() {
+  var outfile=queryfilepath+valueOf('expfile')+'.csv';
+  sendToPcFile(outfile,sqlSelectResultToCsv($r,tabl),isCheckedVar('openfile'));
+  closeForm(); 
+}
+
+</script>
+
+<span style="font-family:garmond; font-size=120%">Query Select Statement</span><br>
+<textarea name=sqltxt ondblclick="checkAtCursor()" cols=125 rows=8 wrap=virtual style="font-family:garmond"></textarea>
+<br><br>
+<span button=runqry onclick="say('Query Running...'); runQuery()">Run query</span>&nbsp
+<span button=fieldlisting onclick="fieldList()">Field Listing</span>&nbsp
+<span button=queryparms width=160 onclick="queryParameters()">Query Parameters</span>&nbsp
+<span button=queryhistory width=180 onclick="queryHistory()">Statement History</span>&nbsp
+<hr>
+<span id=paging style="font-weight:600; font-size=130%; margin-right:10"></span> 
+<input type=button id=prevpagebut value="Previous Page" onclick="getQryPage('previous')">
+<input type=button id=nextpagebut value="Next Page" onclick="getQryPage('next')">
+<input type=button id=sendtoexcel value="Export to Excel" onclick="exportToExcel()">&nbsp
+<span id=msgarea></span>
+<div id=sqldiv style="width:100%; overflow-x:auto; margin-top:8"></div>
+
+<div id=fieldswrap style="display:'none'; top:10; right:30" class=window>
+  <div class="titleBar"></div>
+  <span button=exitbutton type=exit class="ximage" onclick="hideElement('fieldswrap')"></span>
+  <br>
+  <span field=qtable select label='Table Description' labelwidth=120 onchange=getDbFields(valueOf('qtable'))></span>
+  <br>
+  <span field=qtable2 select label='Table Name' labelwidth=120 onchange=getDbFields2()></span>
+  <br><br>
+  <div id=fieldsdiv style="margin-top:5"></div>
+  <br>
+  <textarea id=selectedfields cols=67 rows=2 wrap=virtual style="font-family:garmond;"></textarea>
+  <br>
+</div> 
+
+<div id=divqryparms style="display:'none'; width:300;" class=window>
+  <form name=qryparms>
+    <div class="titleBar">Query Parameters</div>
+    <span button=exitbutton2 type=exit class="ximage" onclick="closeForm()"></span>
+    <br>
+    <span field=sqlselectbatch editcode='n' length="7,0" label="Records per Batch"></span>
+    <br><br>
+    <span field=sqlrcdcnt editcode='n' length="7,0" label='Maximum Record Count'></span>
+    <br>
+    <span field=sqlperpage editcode='n' length="7,0" label='Records per Page'></span>
+    <br><hr>
+    <span button=saveparms type=save onclick="saveParms('fieldswrap')"></span>&nbsp
+    <span button=closeparms type=close onclick="closeForm()"></span>
+    <br><br>
+  </form>
+</div> 
+
+<div id=qryhistorywrap style="display:'none'; width:500; top:200; right:30" class=window>
+  <div class="titleBar">Query Statement History</div>
+  <span button=exitbutton3 type=exit class="ximage" onclick="hideElement('qryhistorywrap')"></span>
+  <br>
+  <div id=qryhistorydiv></div>
+  <br><hr>
+  <span button=closehistory type=close onclick="hideElement('qryhistorywrap')"></span>&nbsp
+  <span button=clearhistory type=close onclick="changeContent('qryhistorydiv',applyTableDef(tabhis))">Clear</span>
+  <br><br>
+</div> 
+
+<div id="divexportform" class="window" style="display:none; width:500">
+  <form name="exportform" style="margin-bottom:0; padding-bottom:none">
+    <div class="titleBar">Export to Excel</div>
+    <span button=exitbuttonexcel type=exit class="ximage" onclick="closeForm()"></span>
+    <span class=label style="color:blue">Excel File to Export to</span><br><br>
+    <b><span id=qfilepath></span><input name=expfile type=text size=75 maxlength=150><b>.csv<b>
+    <br><br> 
+    <span class=label>Open file after Export?</span>
+    <input name=openfile id=openfile type=checkbox checked>
+    <br><br><hr>
+    <span button=doexport type=cancel onclick=exeFunction('doExport()')>Export</span>&nbsp<span button=closedoexport type=cancel onclick=closeForm()></span>
+  </form>
+</div>
+
+
+</body>
+</html>
+
+

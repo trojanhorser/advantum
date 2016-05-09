@@ -1,0 +1,112 @@
+<html>
+<head></head>
+<title>Message Box</title>
+<style>
+  .body
+  {
+    font-family: verdana; font-size:10pt; font-weight:600;
+    filter:progid:DXImageTransform.Microsoft.Gradient (GradientType=0, StartColorStr=white  endColorStr=#3399FF);
+  }
+</style>
+<body class="body" onload="loadUp()">
+
+<script>
+
+ String.prototype.trim = function() {
+   //return this.replace(/^\s+|\s+$/g, "");
+   var str = this.replace(/^\s\s*/, ''), ws = /\s/, i = str.length;
+   while (ws.test(str.charAt(--i)));
+   return str.slice(0, i + 1);
+ };
+
+ dialogparm=new Object();
+ window.returnValue ='';
+
+ if (window.dialogArguments) {
+     if (window.dialogArguments.dialogparm) {
+         dialogparm=window.dialogArguments.dialogparm;
+     }
+     else {
+         alert('No Message to display');
+         window.close();
+     }
+ } 
+
+ if (dialogparm.title) {document.title=dialogparm.title}
+
+ if (dialogparm.bodystyle) {
+      obj=document.getElementsByTagName('body')[0]; 
+      i=0;
+      string=dialogparm.bodystyle;
+      chr='';
+      prvchr='';
+      sstring='';
+      for (i=0; i<string.length; i++) {
+           chr=string.charAt(i);
+           if (chr != '-') {
+               if (prvchr=='-') {sstring += chr.toUpperCase()}
+               else {sstring += chr}
+           }
+           prvchr=chr;
+      }
+      attr=sstring.split(';');
+      pairs='';
+      for (i=0; i<attr.length; i++) {
+           pairs=attr[i].split(':');
+           if (pairs.length==1) {
+               pairs=attr[i].split('=');
+           } 
+           if (pairs.length>1) {
+               try {obj.style[pairs[0].trim()]=pairs[1].trim();} catch(e) {}
+          }
+      } 
+ } 
+     
+
+function loadUp() {
+  
+  scrn=document.getElementById('screen');
+  scrn.style.display='';
+
+  if (dialogparm.text) {
+      messagesection.innerHTML=dialogparm.text;
+  }
+  txt='';
+  if (dialogparm.options) {
+      options=dialogparm.options; 
+      if (typeof(options)=='object') {
+          for (i=0; i<options.length; i++) {
+               data=options[i].split(':');
+               if (data.length==1) {buttontxt=data[0]}
+               else {buttontxt=data[1]}
+               txt += '<button onmouseover=colorThis(this) onmouseout=unColorThis(this) onclick="sendBack('+"'"+data[0]+"')"+'">'+buttontxt+'</button>';
+               if (i+1<options.length) {
+                   txt += '&nbsp;&nbsp;&nbsp;&nbsp;';
+               }
+          }
+      }
+  }
+  optionssection.innerHTML=txt;
+}
+
+function sendBack(val) {
+   window.returnValue=val;
+   window.close(); 
+}
+
+function colorThis(obj) {
+  obj.style.backgroundColor='#cefdbb';
+}
+
+function unColorThis(obj) {
+  obj.style.backgroundColor='';
+}
+
+</script>
+
+<div id=screen style="display:'none'; padding:25">
+ <div id=messagesection style="width:100%; padding:0; text-align:center"></div>
+ <div id=optionssection style="width:100%; margin-top:35; padding:0; text-align:center"></button></div> 
+</div>
+
+</div>

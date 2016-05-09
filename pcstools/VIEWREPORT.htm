@@ -1,0 +1,115 @@
+<html>
+<head></head>
+<title>Report Viewer</title>
+<body onload=exeFunction('loadUp()')>
+<script type="text/JavaScript" src="../pcstools/standardjs.js "></script>
+<script type="text/JavaScript" src="../pcstools/standardsq.js "></script>
+<script type="text/JavaScript" src="startup.js"></script>
+<link rel=stylesheet type="text/css" href="../pcstools/standardss.css"></link>
+
+
+<script>
+ window.dialogHeight=650;
+ window.dialogWidth=650;
+ window.dialogTop=0;
+ window.dialogLeft=0;
+ reporttitle='';
+
+function loadUp() {
+  try {
+    rpt=dialogparm.report;
+    if (!rpt) {
+        alert('No report selected for viewing');
+        window.close();
+        return
+    } 
+
+    reportname=rpt.filepath+rpt.file;
+
+    var iview=rpt.viewiniframe.toLowerCase();
+    if (iview=='no' || iview =='false') {
+        var objshell = new ActiveXObject("Shell.Application");
+        reportname=rpt.filepath+rpt.file;
+        objshell.ShellExecute(reportname); 
+        window.close(); 
+        return;
+    }
+
+    showElement('screen');
+    if (dialogparm.title) {
+        reporttitle=dialogparm.title;
+        window.title=window.title+' - '+dialogparm.title;
+    }
+    document.getElementById('reportframe').src=reportname;
+  }
+
+  catch(e) {
+        alert(e.message+'\n\nUnable to view report');
+  }
+
+}
+
+
+function emailFile() {
+ var dg=new dialogDef();
+ dg.dialogparm.reportname=reportname;
+ dg.dialogparm.subject=reporttitle;
+ dg.height=200;
+ dg.width=680;
+ displayDialog('emailReport.htm',dg);
+}
+
+
+function exportToExcel() {
+  var pcfile=rpt.filepath+'rptTo$$Xls.xls';
+  exportTo('excel',pcfile);
+}
+
+function exportToWord() {
+  var pcfile=rpt.filepath+'rptTo$$Wrd.doc';
+  exportTo('word',pcfile);
+}
+
+function exportTo(where,pcfile) {
+  var reporthtml=''; 
+  if (valueOf('exporttype')=='A') {
+      reporthtml='<html>'+rpt.html.replace(/<left/g,"<span ");
+      reporthtml=reporthtml.split("left>").join("span>");
+      reporthtml=reporthtml.replace(/<pos/g,"<span ");
+      reporthtml=reporthtml.split("pos>").join("span>");
+  }
+  else {
+       reporthtml='<html>'+rpt.detailhtml;
+  }
+  var apptorun;
+  deletePcFile(pcfile);
+  sendToPcFile(pcfile,reporthtml);
+  var objshell = new ActiveXObject("Shell.Application");
+  switch (where) {
+    case "excel": apptorun='excel.exe'; break;
+    case "word": apptorun='winword.exe'; break;   
+  }
+  var usepcfile='"'+pcfile+'"';  
+  objshell.ShellExecute(apptorun, usepcfile, "", "Open", "1");
+}
+
+</script>
+
+<div id=screen style="display:none">
+
+<div id=pageheader style="overflow:hidden; padding-top:5; height:38">
+   <img id=toemail src='..\image\mail2.jpg' title='email report' align=middle style="margin-right:20; height:20px; width:30px;" onclick="emailFile()"></img>
+    <span>Data for export</span> 
+    <select name=exporttype>
+      <option value='D'>Report Details Only</option>
+      <option value='A'>Entire Report</option>
+    </select>
+    <img id=toexcel src='..\image\excel.png' align=middle title='export to excel' style="margin-left:20; height:25px; width:30px;" onclick=exeFunction('exportToExcel()')></img>
+    <img id=toword src='..\image\word.jpg' align=middle title='export to word' style="margin-left:20; height:25px; width:30px;" onclick=exeFunction('exportToWord()')></img>
+</div>
+<div id=pagebottomleft style="width:0"></div>
+<div id=pagebottomright>
+ <iframe id=reportframe style="border='1px solid'; width:100%; height:100%"></iframe>
+</div>
+
+</div>

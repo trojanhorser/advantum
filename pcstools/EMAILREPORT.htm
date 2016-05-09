@@ -1,0 +1,61 @@
+<head></head>
+<title>Email Report</title> 
+<body onload=loadUp()>
+<script type="text/JavaScript" src="../pcstools/standardjs.js "></script>
+<script type="text/JavaScript" src="../pcstools/standardsq.js "></script>
+<script type="text/JavaScript" src="../applications/startup.js "></script>
+<link rel=stylesheet type="text/css" href="../pcstools/standardss.css"></link>
+
+<script>
+
+function loadUp() {
+  if (!dialogparm.reportname) { 
+      alert('No Report to Email');
+      window.close();
+  }
+  try {var mailsearch=emailsearch;}
+  catch(e) {hideElement('emailaddress_search')} 
+  if (dialogparm.emailaddress) {changeVar('emailaddress',dialogparm.emailaddress)}
+  if (dialogparm.subject) {changeVar('subject',dialogparm.subject)}
+  if (dialogparm.message) {changeVar('message',dialogparm.message)}
+
+  focusOn('emailaddress');
+} 
+
+function customerLookUp() {
+ var dg=new dialogDef();
+ dg.width=300;
+ dg.height=300;
+ var searchpgm='../applications/'+emailsearch;
+ var rtnval=displayDialog(searchpgm,dg);
+ if (rtnval) {changeVar('emailaddress',rtnval.emailaddress);}
+}
+
+function emailFile() {
+ var emailto=valueOf('emailaddress');
+ if (isBlank(emailto)) {
+     alert('Enter an email address');
+     focusOn('emailaddress');
+     return;
+ }
+ var mail=new emailDef();
+ mail.to=emailto;
+ mail.subject=valueOf('subject');
+ mail.message=valueOf('message');
+ mail.attachment[0]=dialogparm.reportname;
+ if (sendEmail(mail)) {
+     alert('Mail sent');
+ } 
+}
+
+</script>
+
+<div style="margin:20; width=100%">
+
+  <span field=emailaddress length=45   label="email Address"  labelwidth=110 search="customerLookUp()"></span><br><br>
+  <span field=subject      length=120  label=Subject          labelwidth=110 rows=1></span><br><br>
+  <span field=message      length=300  label=Message          labelwidth=110></span><br>
+  <br>
+  <img id=toemail src='..\image\mail2.jpg' title='email report' align=middle style="margin-left:10; height:20px; width:30px;" onclick="emailFile()"></img>
+ 
+</div>

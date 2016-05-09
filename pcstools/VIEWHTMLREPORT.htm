@@ -1,0 +1,74 @@
+<html>
+<head></head>
+<title></title>
+<body onload=exeFunction('loadUp()')>
+<script type="text/JavaScript" src="../pcstools/standardjs.js"></script>
+
+<style>
+  body {margin-top:5; padding:0}
+  td {white-space: nowrap;}
+  .pagebreak {
+    width:100%;
+    height:5px;
+    background:black;
+    overflow:hidden; 
+  }
+  #pageheader {
+    overflow:auto;
+    width:100%;
+    border:2px solid;
+    background-color:#ffffc8; 
+    border:2px solid green;
+    padding:3px;
+    /*margin-bottom:3px;*/
+  }
+  @media print {
+     body {margin-top:0; padding:0}
+    .pagebreak {page-break-after: always;}
+    #pageheader {display:none} 
+  }
+  .pos {position:absolute; margin:0; padding:0; overflow:hidden}
+  .left {float:left; white-space:nowrap; overflow:hidden}
+  .numcell {width:100%; text-align:right}
+</style>
+
+
+<script>
+
+function loadUp() {
+  var parms=window.opener.windowparmid; 
+  if (!parms) {
+      alert('No report selected for viewing');
+      window.close();
+      return;
+  }
+  rpt=parms.report;
+  txt=parms.txt;
+  if (!rpt && !txt) {
+      alert('No report selected for viewing');
+      window.close();
+      return;
+  }
+  title=parms.title; 
+  if (title) {
+      window.title=title;
+  }
+  if (rpt) {
+      txt=rpt.html.split('<POS').join('<DIV class=pos ');
+      txt=txt.split('/POS>').join('/DIV>');
+      txt=txt.split('<LEFT').join('<SPAN class=left '); 
+      txt=txt.split('/LEFT>').join('/SPAN>'); 
+      txt=txt.split('<pos').join('<DIV class=pos ');
+      txt=txt.split('/pos>').join('/DIV>');
+      txt=txt.split('<left').join('<SPAN class=left '); 
+      txt=txt.split('/left>').join('/SPAN>'); 
+  }
+  changeContent('reportdiv',txt);
+}
+
+</script>
+<div id=pageheader>
+  <button onclick=window.print()>Print</button>&nbsp
+  <button onclick="document.execCommand('SaveAs')">Save As</button>
+</div> 
+<div id=reportdiv style="margin:0; padding:0"></div>

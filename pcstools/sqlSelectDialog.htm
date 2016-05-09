@@ -1,0 +1,57 @@
+<html>
+
+<head><title>:SQL Select</title></head>
+<body onload=exeFunction('loadUp()')>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type='text/JavaScript' src='../applications/startup.js'></script>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+<script>
+    
+function loadUp() {
+  try {
+       rs=dialogparm.rs; 
+       $$sqlcol=dialogparm.$$sqlcol; 
+       rcdcnt=dialogparm.rcdcnt; 
+       useobj=dialogparm.useobj; 
+       sqlbatch=dialogparm.sqlbatch;
+       c=dialogparm.c;
+       var nbr=rs.Fields.Count;
+
+       var fldval='';
+       count=0;
+       while (! rs.EOF && count<sqlbatch) {
+              count ++;  
+              for (var j=0; j<nbr; j++) { 
+                   try {fldval=rs.fields(j).value.trimr();} 
+                   catch(e) {fldval=rs.fields(j).value}
+                   try {if (fldval==null) fldval=' ';} catch (e) {}
+                   useobj[$$sqlcol[j]][c]=fldval;
+              }
+              c=c+1;
+              if (c==rcdcnt) {
+                  break;
+              }
+              rs.MoveNext ();
+        }
+  
+        var rtnobj=new Object;
+        rtnobj.c=c;
+        if (rs.EOF || c==rcdcnt) {rtnobj.eof=true}
+        else {rtnobj.eof=false;}
+        window.returnValue=rtnobj;
+        window.close();
+  }
+  catch(e) {
+        alert(e.message);
+        window.returnValue=''; 
+        window.close();
+  }   
+
+}
+
+</script>
+
+<div id=statusmsg style="position:absolute; top:300; left:300"></div>
+</body>
+</html>
