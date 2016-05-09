@@ -14,7 +14,23 @@ function newData() {
 *
 */
 function addNewRecord(){
-	
+ 
+	 recordObject = {};
+	 recordObject.concde = valueOf('concde');
+	 recordObject.connam = valueOf('connam');
+	 recordObject.conadd = valueOf('conadd');
+	 recordObject.conadd2 = valueOf('conadd2');
+	 recordObject.conadd3 = valueOf('conadd3');
+	 recordObject.conadd4 = valueOf('conadd4');
+	 recordObject.conadd5 = valueOf('conadd5');
+	 recordObject.conemail = valueOf('conadd5');
+	 
+	 if (!sqlInsert('wsconsgn',recordObject)) {
+		  alert(sqlerr);
+	 }else{
+		 alert("Record Added Successfully")
+	 }
+
 }
 
 /**
