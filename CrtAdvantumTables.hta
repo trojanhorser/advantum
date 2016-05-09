@@ -1,0 +1,65 @@
+<html>
+<title>Create Application Tables, Indexes and Views/</title>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardmntdb.js'></script>
+<script type='text/JavaScript' src='startup.js'></script>
+<script type='text/JavaScript' src='dataDictionary.js'></script>
+<script>
+
+
+function doTableCreate() {
+
+  txt='';
+
+
+  for (property in dataDic.table) { 
+         if(!createDbTable(property)){
+            txt += property+', '; 
+         }
+ } 
+ 
+ if (txt) {alert('The following Tables were not created\n'+txt)} 
+ else {alert('tables created successfully')};
+
+}
+
+
+function doIndexCreate() {
+
+ txt ='';
+ for (property in dataDic.table) { 
+         if(!createDbTableIndex(property)){
+             txt += property+', '; 
+         }
+ } 
+
+ if (txt) {alert('Indexes related to the following Tables were not created\n'+txt)} 
+ else {alert('Indexes created successfully')};
+
+}
+
+
+function doViewCreate() {
+ 
+ txt=''; 
+ for (property in dataDic.table) { 
+         if(!createDbTableView(property)){
+            txt += property+', '; 
+         }
+ } 
+
+ if (txt) {alert('Views related to the following Tables were not created\n'+txt)} 
+ else {alert('Views created successfully')};
+
+}
+
+
+</script>
+
+<div id=tab></div>
+<button onclick="doTableCreate()">Create Tables</button>&nbsp
+<button onclick="doIndexCreate()">Create Indexes</button>&nbsp
+<button onclick="doViewCreate()">Create Views</button>
+
+

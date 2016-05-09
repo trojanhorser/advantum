@@ -1,0 +1,214 @@
+<hta:windowState="maximize">
+
+<html>
+<head><title>Lesson1-Data Dictionary & HTML Variables</title></head>
+<body onload=exeFunction('loadUp()')>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type="text/JavaScript" src="startup.js"></script>
+<script type="text/JavaScript" src="datadictionary.js"></script>
+<script> datefmt='d'; timefmt='m'</script>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+
+<style>
+  .lclass {
+     font-size:120%;
+	 color:red;
+  }
+</style>
+<script>
+
+//.ref         {field from the data dictionary that is to be referenced}
+//.type        {'char','numeric','time','date'}
+//.length      {ll or ll,dd where ll=total length and dd=decimal length. eg: 8 or 11,0 or 13,3}
+//             {ignored for type='time' or 'date'}    
+//.decimal     {decimal protion if not stated in the length definition}
+//             {ignored for type='time' or 'date'} 
+//.editcode    {ignored for type='time' or 'date'} 
+//.fieldclass
+//.label       
+//.nolabel     {no label is to be used}
+//.search
+//.labelclass
+//.labelwidth
+//.upper
+//.output
+//.textarea    {ignored for type='time' or 'date'} 
+//.rows        {ignored for type='time' or 'date'} 
+//.cols        {ignored for type='time' or 'date'} 
+//.nocalendar  {Calendar not to be displayed for date field} 
+//.select      {field create as a select field. Use a string of ordered pairs to show the values/text set
+//              Example: select='1:One, 2:Two' eq. <select><option value=1>One</value><option value=2>Two</option></select>} 
+//.readonly
+//.editmask
+//.required
+
+windowbgcolor='gray';
+windowbgfade='50';
+
+function process() {
+  // alert(fieldHTML('field=rcpdate'));
+  changeVar('gpcmt','Charge Description');
+  changeVar('rcpamt','$7k656');
+  changeVar('rcpdate','20150901','*date'); // or changeVar('rcpdate','01092015') since the default date format is ddmmyyyyy
+  changeVar('rcptime',1);
+  changeVar('gpcmt',valueOf('chgdesc'));
+  //hideElement('newbilno','notindic'....);
+  //showElement('newbilno','notindic'....);
+  //protect('id1','id2',....);
+  //unProtect('id1','id2',...);
+  //neverShow('id1','id2');
+  //focusOn('rcpamt','*hi');
+  popUpMsg('Plese enter a value greater than 67777','rcpamt');
+  //changeContent(div/span id,value);
+  changeContent('newdiv','<b>Hello There</b>');
+  //innerText=contentOf(div/span);
+  //innerHTML=contentOf(div/span,'*html');
+  //isBlank(value); //returns true of false;
+  //editDate(date,format) // format='d','m',y' default=Y
+  //alert(editDate('20190101',datefmt));
+  //validDate(date) // returns true of false default=Y
+  alert(validDate('20160231'));
+  //editTime(time); 
+  //validTime(time);
+  
+  // Customised butons
+  // Button types = accept, add, apply, back, cancel, change, close, delete, edit, exit, new, print, refresh, recycle, save 
+  // Defaults to submit
+  // Other parameters = text, width, height
+}
+
+
+function process2() {
+  alert(valueOf('gpcmt'));
+  alert(valueOf('rcpdate'));
+}
+
+
+function loadUp() {
+
+ //viewSource();
+ //changeVar('invnbr',123456);
+ protect('shannon');
+
+}
+
+function doMore() {
+  //alert(valueOf('descr'));
+  //alert(editDate(valueOf('rcpdate'),'m'));
+  //changeVar('bilno',valueOf('chgdesc'));
+}
+
+function findThis() {
+  alert('found');
+}
+
+</script>
+
+
+<button onclick=process()>Process</button><br>
+<button onclick=process2()>Process-2</button><br>
+<button onclick="hideElement('rcpdate','descr'); protect('gpcmt')">Process-3</button><br>
+<button onclick="showElement('rcpdate','descr'); unProtect('gpcmt')">Process-4</button>
+<span field=gpcmt upper></span>
+<span field=invnbr readonly></span><br>
+<span> B/L</span><br>
+<br>
+<span field=bilno  length=60></span>
+<br>
+<span field=bilno  length=79></span>
+
+<br>
+<span field=rcpamt editcode='0' decimal=4 search=findThis()></span>
+<br>
+<span field=rcpdate nocalendar></span>
+<br>
+<span field=rcptime required></span>
+<br>
+<span field=descr fieldclass=lclass nolabel></span>
+<br>
+<span field=newbilno ref=bilno output=text></span>
+<br>
+<span field=chgdesc ></span>
+<br>
+<span field=amount editmask='&&&&(   )  -   '></span>
+<br>
+<span field=notindic select='1:one,2:Two,3:Three'></span>
+
+<span field=shannon type=date></span>
+
+<span field=denis ref=bilno></span>
+
+<span field=customfield ref=bilno label=Bill></span>
+
+<span field=customfield ref=bilno nolabel></span>
+
+Numeric field<br>
+<span field=exampleOne type=numeric></span>
+<br><br><br><br>Character
+<span field=exampleTwo type=char></span>
+<br><br><br><br>Date
+<span field=exampleThree type=date></span>
+<br><br><br><br>Time
+<span field=exampleFour type=time></span>
+
+
+
+<!---
+<span button=buttonid type=print onclick='printReport()'></span><br>
+<span button=buttonid2 type=save width=200 text='Save Data' onclick='printReport()'></span><br>
+<span button=buttonid3 type=exit onclick='printReport()'></span><br><br>
+<span button=buttonid4 text='show Form' onclick=displayForm('form1')></span>
+
+button onclick=doMore()>Do More</button>
+<button onclick=showElement('amount','notindic')>Show</button>
+<button onclick=hideElement('amount','notindic')>Hide</button--->
+
+<div id=newdiv></div>
+
+
+<div id="divform1" style="display:none;" class="window">
+	<form name=form1>
+		<div id=titlebar1 class="titleBar"></div>
+		<span button=exitbutton type=exit class="ximage" onclick='closeForm()'></span>
+		
+        <span field=bilnoa ref=bilno></span><br>
+		<span field=invdate></span><br>
+		<span field=descr2 ref=descr></span><br>
+		<span field=amount2 ref=amount></span><br>
+		<div class=buttonarea>
+		<span button=di1 onclick=displayForm('form2',200,200) text='Second Form'></span>&nbsp;&nbsp;
+		<span button=di2 height=90 width=70 type=print></span>&nbsp;&nbsp;
+		<span button=di3 type=save></span>&nbsp;&nbsp;
+		</div>
+		
+	</form>
+</div>
+
+
+<div id="divform2" style="display:none;" class="window">
+	<form name=form2>
+		<div id=titlebar2 class="titleBar"></div>
+		<span button=exitbutton2 type=exit class="ximage" onclick='closeForm()'></span>
+		content <br>
+		more content
+		<button onclick=displayForm('form3')>Form3</button>&nbsp;&nbsp;
+
+	</form>
+</div>
+
+
+
+<div id="divform3" style="display:none;" class="window">
+	<form name=form3>
+		<div id=titlebar3 class="titleBar"></div>
+		<span button=exitbutton3 type=exit class="ximage" onclick='closeForm()'></span>
+		content <br>
+		more content
+		<button onclick=returnToForm('form1')>Return To Form1</button>&nbsp;&nbsp;
+	</form>
+</div>
+</body>
+</html>
+
+

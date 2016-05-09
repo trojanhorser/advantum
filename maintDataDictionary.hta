@@ -1,0 +1,3434 @@
+ <hta:application 
+   windowState="maximize"
+ >
+<html>
+<head><title>Maintain Data Dictionary</title></head>
+<body onload=loadUp()></body>
+
+
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardreport.js'></script>
+<script type='text/JavaScript' src='dataDictionary.js'></script>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+
+
+<script>
+
+
+function loadUp() {
+
+var dicfield=false;
+for (property in dataDic.field) {
+      dicfield=true;
+      break; 
+}  
+if (!dicfield) { 
+    alert('No data dictionary present in current folder');
+	return;
+}
+
+  fldpmtselect='';
+  processmode='';
+
+  table1=new tableDef();
+  table1.tableid='table1';
+  table1.tableonclick='table1Clicked()';
+  table1.tablestyle='cursor:hand';
+  table1.headonclick[0]='sortTable()';
+  table1.headonclick[1]='sortTable()';
+  table1.headonmouseover[0]="this.style.cursor='hand';this.title='Click to sort'";
+  table1.headonmouseover[1]="this.style.cursor='hand';this.title='Click to sort'";
+  table1.height=550;
+  table1.colprefix='t';
+  var f=table1.column('tab1');    f.header='Table ID';          f.width=100;
+      f=table1.column('tabdsc');  f.header='Table Description'; f.width=250;
+ 
+
+
+  table2=new tableDef();
+  table2.tableid='table2';
+  table2.tableonclick='table2Clicked()';
+  table2.tablestyle='cursor:hand';
+  table2.headonclick[0]='sortTable()';
+  table2.headonclick[1]='sortTable()';
+  table2.headonmouseover[0]="this.style.cursor='hand';this.title='Click to sort'";
+  table2.headonmouseover[1]="this.style.cursor='hand';this.title='Click to sort'";
+  table2.height=550;
+  table2.colprefix='t1';
+  var f=table2.column('fld');    f.header='Field';             f.width=100;
+      f=table2.column('flddsc'); f.header='Field Description'; f.width=200;
+      f=table2.column('fldtyp'); f.header='Type';              f.width=50;
+      f=table2.column('fldlen'); f.header='Length';            f.width=50;
+      f=table2.column('flddec'); f.header='Decimal';           f.width=50;
+  
+
+
+  fridx=new tableDef();
+  fridx.tableid='fridx';
+  fridx.height=300;
+  fridx.colprefix='fri';
+  var f=fridx.column('tab');     f.header='Table';          f.width=65;
+      f=fridx.column('indx');    f.header='Index';          f.width=65;
+      f=fridx.column('part');    f.header='Fields';         f.width=130;
+  
+
+  frvw=new tableDef();
+  frvw.tableid='frvw';
+  frvw.height=300;
+  frvw.colprefix='frv';
+  var f=frvw.column('tab');     f.header='Table';                                 f.width=65;
+      f=frvw.column('view');    f.header='View';                                  f.width=65;
+      f=frvw.column('part');    f.header='Fields:Condition:Join Files:Group by'; f.width=250;
+
+  
+  frky=new tableDef();
+  frky.tableid='frky';
+  frky.height=300;
+  frky.colprefix='frk';
+  var f=frky.column('tab');     f.header='Table';          f.width=65;
+      f=frky.column('keys');    f.header='Keyfields';      f.width=140;
+
+
+
+  frtab=new tableDef();
+  frtab.tableid='frtab';
+  frtab.height=300;
+  frtab.colprefix='frt';
+  var f=frtab.column('tab');     f.header='Name';          f.width=65;
+      f=frtab.column('tabdsc');  f.header='Description';   f.width=140;
+
+
+
+  tblidx=new tableDef();
+  tblidx.tableid='tblidx';
+  tblidx.height=300;
+  tblidx.colprefix='tbli';
+  var f=tblidx.column('indx');    f.header='Index';          f.width=65;
+      f=tblidx.column('part');    f.header='Fields';         f.width=130;
+  
+
+  tblvw=new tableDef();
+  tblvw.tableid='tblvw';
+  tblvw.tableonclick='viewTableClicked()';
+  tblvw.tablestyle='cursor:hand';
+  tblvw.height=300;
+  tblvw.colprefix='tblv';
+  var f=tblvw.column('view');    f.header='View';                                 f.width=65;
+      f=tblvw.column('part');    f.header='Fields:Condition:Join Files:Group by'; f.width=250;
+
+  
+  tblky=new tableDef();
+  tblky.tableid='tblky';
+  tblky.tableonclick='keyfldTableClicked()';
+  tblky.tablestyle='cursor:hand';
+  tblky.height=300;
+  tblky.colprefix='tblk';
+  var f=tblky.column('ord');    f.header='Order';           f.width=40;
+      f=tblky.column('keys');    f.header='Keyfields';      f.width=140;
+
+
+  tblfld=new tableDef();
+  tblfld.tableid='tblfld';
+  tblfld.tableonclick='fldTableClicked()';
+  tblfld.tablestyle='cursor:hand';
+  tblfld.height=300;
+  tblfld.colprefix='tblfl';
+  var f=tblfld.column('fld');     f.header='Field';         f.width=65;
+      f=tblfld.column('flddsc');  f.header='Description';   f.width=140;
+
+
+
+  fldpmt=new tableDef();
+  fldpmt.tableid='fldpmt';
+  fldpmt.tableonclick='fldpmtClicked()';
+  fldpmt.tablestyle='cursor:hand';
+  fldpmt.height=200;
+  fldpmt.sqlrcdcnt=200;
+  fldpmt.colprefix='fp';
+  var f=fldpmt.column('fld');    f.header='Field';             f.width=100;
+      f=fldpmt.column('flddsc'); f.header='Field Description'; f.width=200;
+      f=fldpmt.column('fldtyp'); f.header='Type';              f.width=50;
+      f=fldpmt.column('fldlen'); f.header='Length';            f.width=50;
+      f=fldpmt.column('flddec'); f.header='Decimal';           f.width=50;
+
+
+  fldpmt1=new tableDef();
+  fldpmt1.tableid='fldpmt1';
+  fldpmt1.tableonclick='fldpmt1Clicked()';
+  fldpmt1.tablestyle='cursor:hand';
+  fldpmt1.height=200;
+  fldpmt1.sqlrcdcnt=200;
+  fldpmt1.colprefix='fp1';
+  var f=fldpmt1.column('fld');    f.header='Field';             f.width=100;
+      f=fldpmt1.column('flddsc'); f.header='Field Description'; f.width=200;
+      f=fldpmt1.column('fldtyp'); f.header='Type';              f.width=50;
+      f=fldpmt1.column('fldlen'); f.header='Length';            f.width=50;
+      f=fldpmt1.column('flddec'); f.header='Decimal';           f.width=50;
+
+
+  fldpmt2=new tableDef();
+  fldpmt2.tableid='fldpmt2';
+  fldpmt2.tableonclick='fldpmt2Clicked()';
+  fldpmt2.tablestyle='cursor:hand';
+  fldpmt2.height=200;
+  fldpmt2.sqlrcdcnt=200;
+  fldpmt2.colprefix='fp2';
+  var f=fldpmt2.column('fld');    f.header='Field';             f.width=100;
+      f=fldpmt2.column('flddsc'); f.header='Field Description'; f.width=200;
+      f=fldpmt2.column('fldtyp'); f.header='Type';              f.width=50;
+      f=fldpmt2.column('fldlen'); f.header='Length';            f.width=50;
+      f=fldpmt2.column('flddec'); f.header='Decimal';           f.width=50;
+
+
+  tablpmt=new tableDef();
+  tablpmt.tableid='tablpmt';
+  tablpmt.tableonclick='tablpmtClicked()';
+  tablpmt.tablestyle='cursor:hand';
+  tablpmt.height=200;
+  tablpmt.sqlrcdcnt=200;
+  tablpmt.colprefix='tpmt';
+  var f=tablpmt.column('tbl');    f.header='Table ID';          f.width=100;
+      f=tablpmt.column('tbldsc'); f.header='Table Description'; f.width=200;
+
+
+
+  tviewfld=new tableDef();
+  tviewfld.tableid='tviewfld';
+  tviewfld.tableonclick='viewFldTableClicked()';
+  tviewfld.tablestyle='cursor:hand';  
+  tviewfld.height=300;
+  tviewfld.colprefix='vfld';
+  var f=tviewfld.column('fld');     f.header='Field';          f.width=160;
+
+
+  tviewjfil=new tableDef();
+  tviewjfil.tableid='tviewjfil';
+  tviewjfil.tableonclick='viewJFileTableClicked()';
+  tviewjfil.tablestyle='cursor:hand';
+  tviewjfil.height=300;
+  tviewjfil.colprefix='vjf';
+  var f=tviewjfil.column('tbl');     f.header='Table';          f.width=90;
+  var f=tviewjfil.column('tbldsc');  f.header='Description';    f.width=160;
+
+
+  tvieword=new tableDef();
+  tvieword.tableid='tvieword';
+  tvieword.tableonclick='vGrpTableClicked()';
+  tvieword.tablestyle='cursor:hand';
+  tvieword.height=300;
+  tvieword.colprefix='vord';
+  var f=tvieword.column('ord');     f.header='Order';           f.width=40;
+  var f=tvieword.column('gfld');    f.header='Groupfields';     f.width=160;
+
+  loctn=getPcFilePath('dataDictionary.js');
+  updloctn=getPcFilePath('startup.js').split('\\').join('/')+'/dataDictionary.js';  
+  
+  loadDicTables(); 
+  loadDicFields();
+
+  saveDataDic('initsave');
+  
+  showElement('wrkarea');
+  changeContent('dicloctn',loctn);
+  
+  return;
+}
+
+
+
+
+
+function loadDicFields() {
+   var fltyp='';
+
+   var $flds=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+
+   var txt='';
+   var arr=new Array();
+   var prop;
+   var i=0; 
+   for (prop in dataDic.field) {
+        arr.push(prop);
+   }
+   arr.sort();
+   for (i=0; i<arr.length; i++) {
+
+        fltyp='char';
+
+        f=getFieldAttr(arr[i]);
+
+        if (f.decimal) {
+           fltyp='number';
+           if (f.type == 'date') {fltyp='date';} 
+           if (f.type == 'time') {fltyp='time';} 
+        }
+
+        
+        var n=addSqlSelectRow($flds);
+ 
+        $flds.fld[n]=arr[i];
+        $flds.flddsc[n]=f.desc;
+        $flds.fldtyp[n]=fltyp;
+        $flds.fldlen[n]=f.length;
+        $flds.flddec[n]=f.decimal;
+        
+
+          
+           
+   }  
+
+
+   setSqlSelectResult(table2,$flds); 
+   changeContent('screen2table',applyTableDef(table2));  
+
+   return;
+   
+} 
+
+
+function loadDicTables() {
+
+ var $tbl=new sqlSelectResult('tab1','tabdsc');
+ 
+ for (property in dataDic.table) {
+    var obj=getDbTableAttr(property);
+    var n=addSqlSelectRow($tbl);
+    $tbl.tab1[n]=property;
+    $tbl.tabdsc[n]=obj.desc;
+ }
+
+ setSqlSelectResult(table1,$tbl);
+ changeContent('screen1table',applyTableDef(table1));
+
+
+ return;
+
+}
+
+
+//*************************Field Definition Maintenance Functions*****************************
+
+
+function table2Clicked() {
+  readClickedRow();
+  if (!eof) {popUpContent('optionlist1'); ispop=false;}
+
+}
+
+
+function newRecord() {
+  processmode='new';
+  clearForm('screen2');
+  unProtect('*form:screen2');
+  changeVar('fldtyp','C');
+  showElement('savebutton');
+  hideElement('deletebutton');
+  toggleFldForm();
+  displayForm('screen2');
+  focusOn('fldnam');
+}
+
+
+function getFldRecord() {
+  var fldtyp='';
+
+  changeVar('fldnam',valueOfCol('t1#fld'));
+  changeVar('flddesc',valueOfCol('t1#flddsc'));
+  changeVar('fldlen',numValueOfCol('t1#fldlen'));
+  changeVar('flddec',numValueOfCol('t1#flddec'));
+
+  if (valueOfCol('t1#fldtyp')=='char'){fldtyp='C'}
+  if (valueOfCol('t1#fldtyp')=='number'){fldtyp='N'}
+  if (valueOfCol('t1#fldtyp')=='date'){fldtyp='D'}
+  if (valueOfCol('t1#fldtyp')=='time'){fldtyp='T'}
+
+  changeVar('fldtyp',fldtyp);
+
+
+  return true;
+}
+
+
+
+function changeRecord() {
+  
+  if (!getFldRecord()) {return;}
+  processmode='change';
+  savefrmvar= new saveVar('*form:screen2');
+  unProtect('*form:screen2');
+  
+  showElement('savebutton');
+  hideElement('deletebutton');
+
+  protect('fldnam');
+
+  unProtect('flddec','fldlen');
+
+  if (valueOf('fldtyp') == 'C') {
+     protect('flddec');
+  }
+  if (valueOf('fldtyp') == 'D' || valueOf('fldtyp') == 'T') {
+     protect('flddec','fldlen');
+  }
+
+  displayForm('screen2');
+  focusOn('flddesc');
+}
+
+
+function deleteRecord() {
+  if (!getFldRecord()) {return;}
+  processmode='delete';
+  protect('*form:screen2');
+  hideElement('savebutton');
+  showElement('deletebutton');
+  displayForm('screen2');
+}
+
+
+function viewRecord() {
+  if (!getFldRecord()) {return;}
+  protect('*form:screen2');
+  hideElement('savebutton','deletebutton');
+  displayForm('screen2');
+}
+
+
+
+
+function validFldData() {
+
+   if (isBlank(valueOf('fldnam'))) {
+       alert('Field required');
+       focusOn('fldnam');
+       return false;
+   }
+
+   if (isBlank(valueOf('flddesc'))) {
+       alert('Field Description required');
+       focusOn('flddesc');
+       return false;
+   }
+
+   if (numValueOf('fldlen') == 0) {
+       alert('Field Length required');
+       focusOn('fldlen');
+       return false;
+   }
+
+
+   if (processmode=='new') {
+      for (prop in dataDic.field) {
+        if (valueOf('fldnam') == prop) {
+            alert('Field already defined in data dictionary');
+            focusOn('fldnam');
+            return false;
+        }
+      }
+   }
+
+  
+   return true;
+
+}
+ 
+
+
+function processFld(processtype) {
+    
+  var attrib='';
+
+  
+
+     if (processmode=='change' && !savefrmvar.hasChangedVar()) {
+        closeForm();
+        return;
+     }
+
+     if (!validFldData()) {return;}
+     
+     if (valueOf('fldtyp') == 'C') {attrib=valueOf('fldlen');}
+     if (valueOf('fldtyp') == 'N') {attrib=valueOf('fldlen')+','+valueOf('flddec');}
+     if (valueOf('fldtyp') == 'D') {attrib='date';}
+     if (valueOf('fldtyp') == 'T') {attrib='time';}
+
+     string=valueOf('fldnam')+":"+attrib+":"+valueOf('flddesc');
+     addDicField(string);
+     closeForm();
+
+     loadDicFields();
+     
+     
+
+  
+
+
+}
+
+
+function showFieldAssoc(opt) {
+  if (opt == 'view') {
+    viewRecord();
+    closeForm();
+  }
+   
+   var srchfld=valueOf('fldnam').toUpperCase().trim();
+   var errcond='';
+   var finview='';
+   var finindex='';
+   var partstr='';
+
+   var firstposn=0;
+   var strglen=0;
+
+   
+   var $tbl=new sqlSelectResult('tab','tabdsc');
+   var $vw=new sqlSelectResult('tab','view','part');
+   var $idx=new sqlSelectResult('tab','indx','part');
+   var $keyf=new sqlSelectResult('tab','keys');
+
+ 
+   for (property in dataDic.table) {
+   var obj=getDbTableAttr(property);
+
+  
+     //List assoc. indexes
+
+     for (var l=0; l<obj.index.length; l++) {
+         finindex='N';
+         var idxattr=obj.index[l].split(':');
+
+         //check if field in list of fields
+
+           var fldlst=idxattr[1].split(',');
+           for (var fo=0; fo<fldlst.length; fo++) {
+               var fldstrg=fldlst[fo].toUpperCase().trim();
+               if (fldstrg==srchfld) {
+                  finindex='Y';
+                  if (fldlst.length == 1) { errcond +='Delete field is only field in index '+idxattr[0]+' Delete index before proceeding<br>';  } 
+                  break;
+               }
+           }
+
+        if (finindex=='Y') {
+              var n=addSqlSelectRow($idx);
+              $idx.tab[n]=property;
+              $idx.indx[n]=idxattr[0];
+              $idx.part[n]=idxattr[1];
+              
+        }
+
+
+     }
+
+
+     //List assoc. views
+/*
+     for (var l=0; l<obj.view.length; l++) {
+         finview='N';
+         var viewattr=obj.view[l].split(':');
+
+         //check if field in list of fields
+
+           var fldlst=viewattr[1].split(',');
+           for (var fo=0; fo<fldlst.length; fo++) {
+               var fldsplit=fldlst[fo].split('.');
+               var fldstrg='';
+               if (fldsplit[1]) { fldstrg=fldsplit[1].toUpperCase().trim();}
+               else { fldstrg=fldsplit[0].toUpperCase().trim();}
+               if (fldstrg==srchfld) {
+                  finview='Y';
+                  if (fldlst.length == 1) { errcond +='Delete field is only field in view '+viewattr[0]+' Delete view before proceeding<br>';  } 
+                  break;
+               }
+           }
+
+         //check if field in where condition 
+
+           if (viewattr.length > 2) {
+              var whcond=viewattr[2].toUpperCase().trim();
+              if (whcond.indexOf(srchfld)!=-1) {
+                  firstposn=whcond.indexOf(srchfld);
+                  strglen=srchfld.length;
+                  if (verifyStringFound(whcond,firstposn,strglen)) {
+                     finview='Y';
+                     errcond +='Delete field is part of where condition of view '+viewattr[0]+' Delete view before proceeding<br>';   
+                  }
+              }
+
+           }
+
+         //Check if field in group by
+
+          if (viewattr.length > 4) {
+            
+             var fldlst=viewattr[4].split(',');
+             for (var fo=0; fo<fldlst.length; fo++) {
+                var fldsplit=fldlst[fo].split('.');
+                var fldstrg='';
+                if (fldsplit[1]) { fldstrg=fldsplit[1].toUpperCase().trim();}
+                else { fldstrg=fldsplit[0].toUpperCase().trim();}
+                if (fldstrg==srchfld) {
+                   finview='Y';
+                   if (fldlst.length == 1) { errcond +='Delete field is part of group by condition of view '+viewattr[0]+' Delete view before proceeding<br>';  } 
+                   break;
+                }
+             } 
+
+          }
+
+
+         //Add view to table
+           
+           if (finview=='Y') {
+              var n=addSqlSelectRow($vw);
+              $vw.tab[n]=property;
+              $vw.view[n]=viewattr[0];
+              partstr=viewattr[1];
+              if (viewattr.length > 2) {partstr+=':<br><span style="color:red">'+viewattr[2]+'<span>';}
+              if (viewattr.length > 3) {partstr+=':<br><span style="color:blue">'+viewattr[3]+'<span>';}
+              if (viewattr.length > 4) {partstr+=':<br><span style="color:green">'+viewattr[4]+'<span>';}
+              
+              $vw.part[n]=partstr;
+
+           }
+
+     }
+*/
+     //List assoc. keys
+
+       //check if field in list of keyfields
+
+           var fldlst=obj.keyfield.split(',');
+           for (var fo=0; fo<fldlst.length; fo++) {
+               var fldstrg=fldlst[fo].toUpperCase().trim();
+               if (fldstrg==srchfld) {
+
+                  var n=addSqlSelectRow($keyf);
+                  $keyf.tab[n]=property;
+                  $keyf.keys[n]=obj.keyfield;
+                  
+                  if (fldlst.length == 1) { errcond +='Delete field is only keyfield in table '+property+' Amend keyfield before proceeding<br>'; } 
+                  break;
+               }
+           }
+
+        
+
+     //List assoc. tables
+
+       var fieldnames=obj.field.split(',');
+       for (var fo=0; fo<fieldnames.length; fo++) {
+           if (fieldnames[fo] == valueOf('fldnam')) {
+              var n=addSqlSelectRow($tbl);
+              $tbl.tab[n]=property;
+              $tbl.tabdsc[n]=obj.desc;
+              break;
+           }
+       }
+
+
+   }
+
+
+   //Tables
+   setSqlSelectResult(frtab,$tbl);
+   changeContent('frmvtbl',applyTableDef(frtab));
+
+   //Views
+   //setSqlSelectResult(frvw,$vw);
+   //changeContent('frmvview',applyTableDef(frvw));
+
+   //Indexes
+   setSqlSelectResult(fridx,$idx);
+   changeContent('frmvindex',applyTableDef(fridx));
+
+   //keys
+   setSqlSelectResult(frky,$keyf);
+   changeContent('frmvkeys',applyTableDef(frky));
+  
+
+  
+   closeForm();
+   changeContent('rmvfld',valueOf('fldnam'));
+   changeVar('removefld',valueOf('fldnam'));
+
+   changeContent('rmvmsgdiv','');
+   if (opt=='delete') {
+      changeContent('rmvmsgdiv',errcond);
+      changeContent('assoctitl',':Objects Affected by Field Removal');
+   }
+   else {changeContent('assoctitl',':Objects Associated with Field');}
+
+   hideElement('acceptbutton');
+   if (isBlank(errcond) && opt=='delete') {showElement('acceptbutton');}
+
+   displayForm('screen3');
+
+
+}
+
+
+
+function verifyStringFound(whcond,firstposn,strglen) {
+   var aplh=new Array();
+   var numarr=new Array();
+   var cnfound='N';
+   var prevpos=0;
+   var nxtpos=0;
+   var poschar='';
+   var srchcondlen=whcond.length;
+
+   aplh=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+   numarr=['0','1','2','3','4','5','6','7','8','9'];
+
+   
+   //Check previous position for character or number
+
+   if (firstposn > 0) {
+      prevpos=firstposn;
+      poschar=whcond.sst(prevpos,1);
+
+      for (var i=0; i<26; i++) {
+          if (poschar==aplh[i]) {cnfound='Y';break;} 
+      }
+      for (var i=0; i<10; i++) {
+          if (poschar==numarr[i]) {cnfound='Y';break;} 
+      }
+
+   }   
+
+   //Check next position for character or number
+
+   nxtpos=firstposn+strglen+1;
+   if (nxtpos <= srchcondlen) {
+      poschar=whcond.sst(nxtpos,1);
+
+      for (var i=0; i<26; i++) {
+          if (poschar==aplh[i]) {cnfound='Y';break;} 
+      }
+      for (var i=0; i<10; i++) {
+          if (poschar==numarr[i]) {cnfound='Y';break;} 
+      }
+
+   }
+
+   if (cnfound=='Y') { return false;}
+   else {return true;}
+
+}
+
+
+function processFldDelete() {
+   
+   //remove field 
+   if (processmode !='TableFieldDelete') {
+     delete dataDic.field[valueOf('removefld')];
+   }
+
+
+   //remove field from tables
+     posTabCursor('frtab','top');
+     readRow();
+     if (!eof) {
+         while (!eof) {
+           removeDbTableField(valueOfCol('frt#tab'),valueOf('removefld'))
+           readRow();
+         }
+     }
+
+
+    //remove keyfield
+     posTabCursor('frky','top');
+     readRow();
+     if (!eof) {
+         while (!eof) {
+           removeDbTableKeyfield(valueOfCol('frk#tab'),valueOf('removefld'))
+           readRow();
+         }
+     }
+
+
+    //remove field from views
+      posTabCursor('frvw','top');
+      readRow();
+      if (!eof) {
+         while (!eof) {
+           removeDbTableViewfield(valueOfCol('frv#tab'),valueOfCol('frv#view'),valueOf('removefld'))
+           readRow();
+         }
+      }
+
+
+    //remove field from indexes
+      posTabCursor('fridx','top');
+      readRow();
+      if (!eof) {
+         while (!eof) {
+           removeDbTableIndexfield(valueOfCol('fri#tab'),valueOfCol('fri#indx'),valueOf('removefld'))
+           readRow();
+         }
+      }
+    
+
+   closeForm();
+   if (processmode !='TableFieldDelete') {loadDicFields();}
+   else {dspTableProperties();}
+   
+   
+
+}
+
+
+
+function removeDbTableField(dbtable,field) {
+  var fldarr=new Array();
+  var fldarr2=new Array(); 
+  obj=dataDic.table[dbtable];
+  fldarr=obj.field.split(",");
+  for (var i=0; i<fldarr.length; i++) {
+       if (fldarr[i]!=field) {
+           fldarr2.push(fldarr[i]);
+       } 
+  } 
+  obj.field=fldarr2.toString(); 
+  
+}
+
+
+function removeDbTableKeyfield(dbtable,field) {
+  var fldarr=new Array();
+  var fldarr2=new Array(); 
+  obj=dataDic.table[dbtable];
+  fldarr=obj.keyfield.split(",");
+  for (var i=0; i<fldarr.length; i++) {
+       if (fldarr[i]!=field) {
+           fldarr2.push(fldarr[i]);
+       } 
+  } 
+  obj.keyfield=fldarr2.toString(); 
+  
+}
+
+
+function removeDbTableViewfield(dbtable,view,field) {
+  var fldarr=new Array();
+  var fldarr2=new Array(); 
+  obj=dataDic.table[dbtable];
+
+  for (var l=0; l<obj.view.length; l++) {
+         
+         var viewattr=obj.view[l].split(':');    
+
+            if (view == viewattr[0]) {
+
+              fldarr=viewattr[1].split(",");
+              for (var i=0; i<fldarr.length; i++) {
+                if (fldarr[i]!=field) {
+                    fldarr2.push(fldarr[i]);
+                } 
+              } 
+              var updview=viewattr[0]+':'+fldarr2.toString();
+              if (viewattr[2]) { updview+=':'+viewattr[2];} 
+              if (viewattr[3]) { updview+=':'+viewattr[3];}
+              if (viewattr[4]) { updview+=':'+viewattr[4];}
+
+              obj.view[l]=updview;
+              break;
+            }
+
+  } 
+  
+}
+
+
+
+function removeDbTableIndexfield(dbtable,index,field) {
+  var fldarr=new Array();
+  var fldarr2=new Array(); 
+  obj=dataDic.table[dbtable];
+
+  for (var l=0; l<obj.index.length; l++) {
+         
+         var indexattr=obj.index[l].split(':');    
+
+            if (index == indexattr[0]) {
+
+              fldarr=indexattr[1].split(",");
+              for (var i=0; i<fldarr.length; i++) {
+                if (fldarr[i]!=field) {
+                    fldarr2.push(fldarr[i]);
+                } 
+              } 
+              var updindex=indexattr[0]+':'+fldarr2.toString();
+              
+              obj.index[l]=updindex;
+              break;
+            }
+
+  } 
+  
+}
+
+
+
+
+
+
+//*************************Table Definition Maintenance Functions*****************************
+
+
+function newTableRecord() {
+  processmode1='new';
+  clearForm('screen11');
+  unProtect('*form:screen11');
+  showElement('savetblbutton');
+  hideElement('deletetblbutton');
+  displayForm('screen11');
+  focusOn('tablenam');
+}
+
+function changeTableRecord() {
+  processmode1='change';
+  clearForm('screen11');
+  unProtect('*form:screen11');
+  protect('tablenam');
+  changeVar('tablenam',valueOfCol('t#tab1'));
+  changeVar('tabledesc',valueOfCol('t#tabdsc'));
+  savefrmvar1= new saveVar('*form:screen11');
+  showElement('savetblbutton');
+  hideElement('deletetblbutton');
+  displayForm('screen11');
+  focusOn('tabledesc');
+}
+
+
+function deleteTableRecord() {
+  processmode1='delete';
+  clearForm('screen11');
+  protect('*form:screen11');
+  changeVar('tablenam',valueOfCol('t#tab1'));
+  changeVar('tabledesc',valueOfCol('t#tabdsc'));
+  hideElement('savetblbutton');
+  showElement('deletetblbutton');
+  displayForm('screen11');  
+}
+
+
+function validTableData() {
+
+   if (isBlank(valueOf('tablenam'))) {
+       alert('Table ID required');
+       focusOn('tablenam');
+       return false;
+   }
+
+   if (isBlank(valueOf('tabledesc'))) {
+       alert('Table Description required');
+       focusOn('tabledesc');
+       return false;
+   }
+
+   
+
+
+   if (processmode1=='new') {
+      for (prop in dataDic.table) {
+        if (valueOf('tablenam') == prop) {
+            alert('Table already defined in data dictionary');
+            focusOn('tablenam');
+            return false;
+        }
+      }
+   }
+   
+   if  (processmode1!='new') {
+       if (!getDbTableAttr(valueOf('tablenam'))) {
+		   alert('Table not found in data dictionary');
+		   focusOn('tablenam');
+		   return false;
+	   }
+   }
+
+  
+   return true;
+
+}
+ 
+
+
+
+function processTable() {
+   
+     if (processmode1=='change' && !savefrmvar1.hasChangedVar()) {
+        closeForm();
+        return;
+     }
+
+     if (!validTableData()) {return;}
+     
+     if (processmode1=='new') {
+        eval("dataDic.table."+valueOf('tablenam')+"=new Object");
+        eval("var obj=dataDic.table."+valueOf('tablenam'));
+        obj.desc=valueOf('tabledesc');
+
+        
+        obj.field=''; 
+        obj.keyfield='';
+
+        obj.index='';  
+        obj.view='';
+        
+
+        closeForm();
+
+        changeVar('seldbtable',valueOf('tablenam'));
+        changeVar('seldbtabledsc',valueOf('tabledesc'));
+        dspTableProperties();
+     }
+	 
+	 if (processmode1=='change') {
+	     eval("var obj=dataDic.table."+valueOf('tablenam'));
+         obj.desc=valueOf('tabledesc');
+		 closeForm();
+	 }
+    
+	  if (processmode1=='delete') {
+	     try {
+			eval("delete dataDic.table."+valueOf('tablenam'));
+			closeForm();
+		 }
+         catch(e) {alert(e.message);}		 
+	  }
+	
+
+     loadDicTables();
+    
+
+
+}
+
+
+
+function table1Clicked() {
+   readClickedRow();
+  if (!eof) {popUpContent('optionlist2'); ispop=false;}
+}
+
+
+function mntableProperties() {
+   changeVar('seldbtable',valueOfCol('t#tab1'));
+   changeVar('seldbtabledsc',valueOfCol('t#tabdsc'));
+   dspTableProperties();
+}
+
+
+
+function dspTableProperties() {
+
+   var tableid=valueOf('seldbtable');
+   
+
+   var partstr='';
+
+   var $fl=new sqlSelectResult('fld','flddsc');   
+   var $vw=new sqlSelectResult('view','part');
+   var $idx=new sqlSelectResult('indx','part');
+   var $keyf=new sqlSelectResult('ord','keys');
+
+   
+   var obj=getDbTableAttr(tableid);
+
+  
+     //List assoc. indexes
+
+     for (var l=0; l<obj.index.length; l++) {
+         
+         var idxattr=obj.index[l].split(':');
+
+         var n=addSqlSelectRow($idx);
+         $idx.indx[n]=idxattr[0];
+         $idx.part[n]=idxattr[1];
+              
+
+     }
+
+
+     //List assoc. views
+
+     for (var l=0; l<obj.view.length; l++) {
+         
+         var viewattr=obj.view[l].split(':');
+
+              var n=addSqlSelectRow($vw);
+              
+              $vw.view[n]=viewattr[0];
+              partstr=viewattr[1];
+              if (viewattr.length > 2) {partstr+=':<br><span style="color:red">'+viewattr[2]+'<span>';}
+              if (viewattr.length > 3) {partstr+=':<br><span style="color:blue">'+viewattr[3]+'<span>';}
+              if (viewattr.length > 4) {partstr+=':<br><span style="color:green">'+viewattr[4]+'<span>';}
+              
+              $vw.part[n]=partstr;
+
+           
+
+     }
+
+     //List assoc. keys
+
+       var fldlst=obj.keyfield.split(',');
+          if (!isBlank(fldlst[0])) {
+           for (var fo=0; fo<fldlst.length; fo++) {
+
+                var n=addSqlSelectRow($keyf);
+                $keyf.ord[n]=fo+1;
+                $keyf.keys[n]=fldlst[fo];
+
+           }
+          }
+
+
+     //List fields
+
+       var fldlst=obj.field.split(',');
+          if (!isBlank(fldlst[0])) {
+           for (var fo=0; fo<fldlst.length; fo++) {
+
+                var flobj=getFieldAttr(fldlst[fo]);             
+
+                var n=addSqlSelectRow($fl);
+                $fl.fld[n]=fldlst[fo];
+                $fl.flddsc[n]=flobj.desc;
+
+           }
+          }
+                  
+
+  
+
+   //Views
+   //setSqlSelectResult(tblvw,$vw);
+   //changeContent('tblview',applyTableDef(tblvw));
+
+   //Indexes
+   setSqlSelectResult(tblidx,$idx);
+   changeContent('tblindex',applyTableDef(tblidx));
+
+   //keys
+   setSqlSelectResult(tblky,$keyf);
+   changeContent('tblkeys',applyTableDef(tblky));
+
+   //fields
+   setSqlSelectResult(tblfld,$fl);
+   changeContent('tblflds',applyTableDef(tblfld));
+  
+   
+   changeContent('dbtableid',tableid+'  -  '+valueOf('seldbtabledsc'));
+   
+   displayForm('screen4',110,110);
+
+
+}
+
+
+
+
+//*****Table Field processing*************************
+
+function fldTableClicked() {
+  readClickedRow();
+  if (!eof) {popUpContent('tablefieldoptlst'); ispop=false;}
+
+
+}
+
+
+
+function showTableFieldAssoc() {
+
+   processmode='TableFieldDelete';
+
+   var maintfld=valueOfCol('tblfl#fld'); 
+   var mainttabl=valueOf('seldbtable'); 
+
+   
+   var srchfld=maintfld.toUpperCase().trim();
+   var errcond='';
+   var finview='';
+   var finindex='';
+   var partstr='';
+
+   var firstposn=0;
+   var strglen=0;
+
+   
+   var $tbl=new sqlSelectResult('tab','tabdsc');
+   var $vw=new sqlSelectResult('tab','view','part');
+   var $idx=new sqlSelectResult('tab','indx','part');
+   var $keyf=new sqlSelectResult('tab','keys');
+
+ 
+   
+   var obj=getDbTableAttr(mainttabl);
+
+  
+     //List assoc. indexes
+
+     for (var l=0; l<obj.index.length; l++) {
+         finindex='N';
+         var idxattr=obj.index[l].split(':');
+
+         //check if field in list of fields
+
+           var fldlst=idxattr[1].split(',');
+           for (var fo=0; fo<fldlst.length; fo++) {
+               var fldstrg=fldlst[fo].toUpperCase().trim();
+               if (fldstrg==srchfld) {
+                  finindex='Y';
+                  if (fldlst.length == 1) { errcond +='Delete field is only field in index '+idxattr[0]+' Delete index before proceeding<br>';  } 
+                  break;
+               }
+           }
+
+        if (finindex=='Y') {
+              var n=addSqlSelectRow($idx);
+              $idx.tab[n]=mainttabl;
+              $idx.indx[n]=idxattr[0];
+              $idx.part[n]=idxattr[1];
+              
+        }
+
+
+     }
+
+
+     //List assoc. views
+
+     for (var l=0; l<obj.view.length; l++) {
+         finview='N';
+         var viewattr=obj.view[l].split(':');
+
+         //check if field in list of fields
+
+           var fldlst=viewattr[1].split(',');
+           for (var fo=0; fo<fldlst.length; fo++) {
+               var fldsplit=fldlst[fo].split('.');
+               var fldstrg='';
+               if (fldsplit[1]) { fldstrg=fldsplit[1].toUpperCase().trim();}
+               else { fldstrg=fldsplit[0].toUpperCase().trim();}
+               if (fldstrg==srchfld) {
+                  finview='Y';
+                  if (fldlst.length == 1) { errcond +='Delete field is only field in view '+viewattr[0]+' Delete view before proceeding<br>';  } 
+                  break;
+               }
+           }
+
+         //check if field in where condition 
+
+           if (viewattr.length > 2) {
+              var whcond=viewattr[2].toUpperCase().trim();
+              if (whcond.indexOf(srchfld)!=-1) {
+                  firstposn=whcond.indexOf(srchfld);
+                  strglen=srchfld.length;
+                  if (verifyStringFound(whcond,firstposn,strglen)) {
+                     finview='Y';
+                     errcond +='Delete field is part of where condition of view '+viewattr[0]+' Delete view before proceeding<br>';   
+                  } 
+              }
+
+           }
+
+
+         //Check if field in group by
+
+          if (viewattr.length > 4) {
+            
+             var fldlst=viewattr[4].split(',');
+             for (var fo=0; fo<fldlst.length; fo++) {
+                var fldsplit=fldlst[fo].split('.');
+                var fldstrg='';
+                if (fldsplit[1]) { fldstrg=fldsplit[1].toUpperCase().trim();}
+                else { fldstrg=fldsplit[0].toUpperCase().trim();}
+                if (fldstrg==srchfld) {
+                   finview='Y';
+                   if (fldlst.length == 1) { errcond +='Delete field is part of group by condition of view '+viewattr[0]+' Delete view before proceeding<br>';  } 
+                   break;
+                }
+             } 
+
+          }   
+
+
+         //Add view to table
+           
+           if (finview=='Y') {
+              var n=addSqlSelectRow($vw);
+              $vw.tab[n]=mainttabl;
+              $vw.view[n]=viewattr[0];
+              partstr=viewattr[1];
+              if (viewattr.length > 2) {partstr+=':<br><span style="color:red">'+viewattr[2]+'<span>';}
+              if (viewattr.length > 3) {partstr+=':<br><span style="color:blue">'+viewattr[3]+'<span>';}
+              if (viewattr.length > 4) {partstr+=':<br><span style="color:green">'+viewattr[4]+'<span>';} 
+              
+              $vw.part[n]=partstr;
+
+           }
+
+     }
+
+     //List assoc. keys
+
+       //check if field in list of keyfields
+
+           var fldlst=obj.keyfield.split(',');
+           for (var fo=0; fo<fldlst.length; fo++) {
+               var fldstrg=fldlst[fo].toUpperCase().trim();
+               if (fldstrg==srchfld) {
+
+                  var n=addSqlSelectRow($keyf);
+                  $keyf.tab[n]=mainttabl;
+                  $keyf.keys[n]=obj.keyfield;
+                  
+                  if (fldlst.length == 1) { errcond +='Delete field is only keyfield in table '+mainttabl+' Amend keyfield before proceeding<br>'; } 
+                  break;
+               }
+           }
+
+        
+
+     //List assoc. tables
+
+       var fieldnames=obj.field.split(',');
+       for (var fo=0; fo<fieldnames.length; fo++) {
+           if (fieldnames[fo] == maintfld) {
+              var n=addSqlSelectRow($tbl);
+              $tbl.tab[n]=mainttabl;
+              $tbl.tabdsc[n]=obj.desc;
+              break;
+           }
+       }
+
+
+   
+
+
+   //Tables
+   setSqlSelectResult(frtab,$tbl);
+   changeContent('frmvtbl',applyTableDef(frtab));
+
+   //Views
+   //setSqlSelectResult(frvw,$vw);
+   //changeContent('frmvview',applyTableDef(frvw));
+
+   //Indexes
+   setSqlSelectResult(fridx,$idx);
+   changeContent('frmvindex',applyTableDef(fridx));
+
+   //keys
+   setSqlSelectResult(frky,$keyf);
+   changeContent('frmvkeys',applyTableDef(frky));
+  
+   
+   changeContent('rmvfld',maintfld);
+   changeVar('removefld',maintfld);
+
+   changeContent('rmvmsgdiv','');
+   changeContent('rmvmsgdiv',errcond);
+   changeContent('assoctitl',':Objects Affected by Field Removal');
+   
+
+   hideElement('acceptbutton');
+   if (isBlank(errcond)) {showElement('acceptbutton');}
+
+   displayForm('screen3');
+
+
+}
+
+
+function newTablField() {
+  clearForm('screen5');
+  protect('*form:screen5');
+  unProtect('ntfldnam');
+  setWriteOff('ntfldnam');
+  displayForm('screen5');  
+
+
+}
+
+
+function newTblFldLookupInit() {
+
+ fldpmtselect='tablefield';
+
+  var $flds=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+  
+  setSqlSelectResult(fldpmt,$flds);
+  changeContent('fldpmttable',applyTableDef(fldpmt));
+  changeVar('fplkpfld','');
+  displayForm('pmtscreen1',ypos,xpos);
+  focusOn('fplkpfld'); 
+
+}
+
+
+
+
+
+function newTblFldLookup() {
+
+ if (isBlank(valueOf('fplkpfld'))) {alert('Enter portion of Field ID'); return;}
+
+ var srchflen=valueOf('fplkpfld').length;
+ var srchfld=valueOf('fplkpfld').toUpperCase().trim();
+ var objfl1='';
+ var objfl='';
+
+ var fltyp='';
+
+   var $flds=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+
+   var txt='';
+   var arr=new Array();
+   var prop;
+   var i=0; 
+   for (prop in dataDic.field) {
+        objfl1=prop.sst(1,srchflen);
+        objfl=objfl1.toUpperCase().trim();
+        if (srchfld == objfl) {
+           var fldexists='N';
+              posTabCursor('tblfld','top');
+              readRow();
+              while (!eof) {
+                   if (valueOfCol('tblfl#fld')==prop) {
+                      fldexists='Y';
+                      break; 
+                   }
+                   readRow();
+              }
+              if (fldexists=='N') {arr.push(prop);}
+        }
+   }
+   arr.sort();
+   for (i=0; i<arr.length; i++) {
+
+        fltyp='char';
+
+        f=getFieldAttr(arr[i]);
+
+        if (f.decimal) {
+           fltyp='number';
+           if (f.type == 'date') {fltyp='date';} 
+           if (f.type == 'time') {fltyp='time';} 
+        }
+
+       
+        var n=addSqlSelectRow($flds);
+ 
+        $flds.fld[n]=arr[i];
+        $flds.flddsc[n]=f.desc;
+        $flds.fldtyp[n]=fltyp;
+        $flds.fldlen[n]=f.length;
+        $flds.flddec[n]=f.decimal;
+        
+           
+   }  
+
+
+   setSqlSelectResult(fldpmt,$flds); 
+   changeContent('fldpmttable',applyTableDef(fldpmt)); 
+  
+
+   return;
+
+
+}
+
+
+
+
+
+
+function fldpmtClicked() {
+  readClickedRow(); 
+       
+    changeVar('ntfldnam',valueOfCol('fp#fld'));
+    changeVar('ntflddesc',valueOfCol('fp#flddsc'));
+    changeVar('ntfldtyp',valueOfCol('fp#fldtyp'));
+    changeVar('ntfldlen',valueOfCol('fp#fldlen'));
+    changeVar('ntflddec',valueOfCol('fp#flddec'));
+  
+  
+    closeForm();
+
+}
+
+
+
+
+
+function doAddTblFld() {
+   if (isBlank(valueOf('ntfldnam'))) {
+      alert('Please select desired field'); 
+      return;
+   }
+   newRow('tblfld');
+   changeCol('tblfl#fld', valueOf('ntfldnam'));
+   changeCol('tblfl#flddsc', valueOf('ntflddesc'));
+
+   var dbtabl=valueOf('seldbtable')
+
+   var fldarr=new Array();
+   var fldarr2=new Array();
+   obj=dataDic.table[dbtabl];
+   fldarr=obj.field.split(",");
+   for (var ll=0; ll<fldarr.length; ll++){
+       if (!isBlank(fldarr[ll])) {
+          fldarr2.push(fldarr[ll]);
+       }
+   }
+   fldarr2.push(valueOf('ntfldnam'));
+   fldarr2.sort();
+   obj.field=fldarr2.toString(); 
+
+   closeForm();
+   
+}
+
+
+
+//*****Table Key Field processing*************************
+
+
+function newTablKeyField() {
+   
+   processmode='newkfld';
+   unProtect('*form:screen6');
+   clearForm('screen6');
+
+   //Load order select
+
+   var fldarr1=new Array();
+   var cntarry=new Array(); 
+   var cnt=0;
+   posTabCursor('tblky','top');
+   readRow();
+   while (!eof) {
+        cnt++;
+        cntarry.push(cnt);
+        fldarr1.push(valueOfCol('tblk#keys'));
+        readRow();
+   }  
+
+   cnt++; 
+   cntarry.push(cnt);
+
+   loadSelect('ntkfldpos',cntarry);
+   changeVar('ntkfldpos',cnt); 
+
+   
+   //Load field select
+   var kfnd='N';
+   var fldarry=new Array(); 
+   posTabCursor('tblfld','top');
+   readRow();
+   while (!eof) {
+        kfnd='N';
+        for (var ll=0; ll<fldarr1.length; ll++){        
+            if (valueOfCol('tblfl#fld') == fldarr1[ll]) {
+               kfnd='Y';
+               break;
+            }
+        }
+        if (kfnd=='N') { fldarry.push(valueOfCol('tblfl#fld'));}
+        readRow();
+   }
+
+   loadSelect('ntkfldnam',fldarry);
+   changeVar('ntkfldnam','');
+
+   changeContent('ktabtitl','Add Key Field to Table');
+
+   hideElement('deletebutton4');
+   showElement('savebutton4');
+
+   displayForm('screen6');  
+
+}
+
+
+function tblKeyFldMaint() {
+   if (processmode=='newkfld'){ doAddTblKeyFld();}
+   else { doChgTblKeyFld();} 
+  
+}
+
+
+function doAddTblKeyFld() {
+   if (isBlank(valueOf('ntkfldnam'))) {
+      alert('Please select desired field'); 
+      return;
+   }
+ 
+
+   var dbtabl=valueOf('seldbtable')
+
+   var fldarr=new Array();
+   var fldarr2=new Array();
+   obj=dataDic.table[dbtabl];
+   fldarr=obj.keyfield.split(",");
+
+   
+
+   for (var i=0; i<fldarr.length; i++) {
+        if (numValueOf('ntkfldpos')==(i+1)){
+           fldarr2.push(valueOf('ntkfldnam'));
+        }
+        if (!isBlank(fldarr[i])) {
+           fldarr2.push(fldarr[i]);
+        }
+   } 
+   if (numValueOf('ntkfldpos')>fldarr.length) {
+       fldarr2.push(valueOf('ntkfldnam'));
+   }
+
+   obj.keyfield=fldarr2.toString(); 
+
+   closeForm();
+   dspTableProperties();
+   
+}
+
+
+function keyfldTableClicked() {
+  readClickedRow();
+  if (!eof) {popUpContent('tablekfieldoptlst'); ispop=false;}
+
+
+}
+
+ 
+
+
+
+
+function chgTablKeyField() {
+   processmode='chgkfld';
+   unProtect('*form:screen6');
+   clearForm('screen6');
+
+
+   var fldarr=new Array();
+   fldarr[0]=valueOfCol('tblk#keys');
+   loadSelect('ntkfldnam',fldarr);
+   protect('ntkfldnam');
+
+
+   //Load order select
+
+   var cntarry=new Array(); 
+   var cnt=0;
+   posTabCursor('tblky','top');
+   readRow();
+   while (!eof) {
+        cnt++;
+        cntarry.push(cnt);
+        readRow();
+   }  
+
+   cnt++; 
+   cntarry.push(cnt);
+
+   loadSelect('ntkfldpos',cntarry);
+   changeVar('ntkfldpos',cnt); 
+
+
+   savefrmvark= new saveVar('*form:screen6');
+
+
+   hideElement('deletebutton4');
+   showElement('savebutton4');
+
+   changeContent('ktabtitl','Maintain Key Field Position');
+
+   displayForm('screen6');     
+
+
+}
+
+
+function doChgTblKeyFld() {
+  if (!savefrmvark.hasChangedVar()) {
+        closeForm();
+        return;
+  }
+
+  var dbtabl=valueOf('seldbtable')
+
+   var fldarr=new Array();
+   var fldarr2=new Array();
+   obj=dataDic.table[dbtabl];
+   fldarr=obj.keyfield.split(",");
+
+   if (valueOf('ntkfldpos')=='1') {
+      fldarr2.push(valueOf('ntkfldnam'));
+   }
+
+   for (var i=0; i<fldarr.length; i++) {
+        if (i > 0 && numValueOf('ntkfldpos')==(i+1)){
+           fldarr2.push(valueOf('ntkfldnam'));
+        }
+        if (valueOf('ntkfldnam')!=fldarr[i]) {
+           fldarr2.push(fldarr[i]);
+        }
+   } 
+   if (numValueOf('ntkfldpos')>fldarr.length) {
+       fldarr2.push(valueOf('ntkfldnam'));
+   }
+
+   obj.keyfield=fldarr2.toString(); 
+
+   closeForm();
+   dspTableProperties();
+   
+
+
+}
+
+
+
+
+
+
+function dltTablKeyField() {
+   processmode='dltkfld';
+   clearForm('screen6');
+      
+   var ordarr=new Array();
+   ordarr[0]=valueOfCol('tblk#ord');
+   loadSelect('ntkfldpos',ordarr);
+   protect('ntkfldpos'); 
+
+   var fldarr=new Array();
+   fldarr[0]=valueOfCol('tblk#keys');
+   loadSelect('ntkfldnam',fldarr);
+   protect('ntkfldnam');
+
+
+   showElement('deletebutton4');
+   hideElement('savebutton4');
+
+   changeContent('ktabtitl','Delete Key Field');
+
+   displayForm('screen6');     
+
+
+}
+
+
+function doDeleteTblKeyFld() {
+
+   var dbtabl=valueOf('seldbtable')
+
+   var fldarr=new Array();
+   var fldarr2=new Array();
+   obj=dataDic.table[dbtabl];
+   fldarr=obj.keyfield.split(",");
+
+ 
+   for (var i=0; i<fldarr.length; i++) {
+        if (valueOf('ntkfldnam')!=fldarr[i]){
+           fldarr2.push(fldarr[i]);
+        }
+   } 
+
+   obj.keyfield=fldarr2.toString(); 
+
+   closeForm();
+   dspTableProperties();
+   
+}
+
+
+//****** Table View Processing
+
+function newTablView() {
+
+   processmode='newview';
+
+   changeVar('viewchanged','N');
+   changeVar('viewnam','');
+   unProtect('viewnam');
+   
+
+   var $fld=new sqlSelectResult('fld');
+   var $jfil=new sqlSelectResult('tbl','tbldsc');
+   var $grp=new sqlSelectResult('ord','gfld');
+
+   setSqlSelectResult(tviewfld,$fld);
+   changeContent('viewfields',applyTableDef(tviewfld));
+
+   setSqlSelectResult(tviewjfil,$jfil);
+   changeContent('viewjoinfiles',applyTableDef(tviewjfil));
+
+   setSqlSelectResult(tvieword,$grp);
+   changeContent('viewgrp',applyTableDef(tvieword));
+
+   displayForm('screen7');
+   focusOn('viewnam');
+
+}
+
+
+function viewTableClicked() {
+    readClickedRow();
+    if (!eof) {popUpContent('tableviewoptlst'); ispop=false;}
+
+}
+
+
+function chgTablView() {
+
+   processmode='changeview';
+
+   changeVar('viewchanged','N');
+   changeVar('viewnam',valueOfCol('tblv#view'));
+   protect('viewnam');
+
+   var $fld=new sqlSelectResult('fld');
+   var $jfil=new sqlSelectResult('tbl','tbldsc');
+   var $grp=new sqlSelectResult('ord','gfld');
+
+   var tableid=valueOf('seldbtable');
+
+   var obj=getDbTableAttr(tableid);
+
+   
+     for (var l=0; l<obj.view.length; l++) {
+         
+         var viewattr=obj.view[l].split(':');
+
+           if (viewattr[0] == valueOfCol('tblv#view')) {
+
+              //Fields             
+              var fldlst=viewattr[1].split(',');
+              for (var fo=0; fo<fldlst.length; fo++) {
+                  var n=addSqlSelectRow($fld);
+                  $fld.fld[n]=fldlst[fo].trim();
+
+              }
+
+              
+              
+              //tables  
+              if (viewattr[3]){           
+                 var tbllst=viewattr[3].split(',');
+                 for (var fo=0; fo<tbllst.length; fo++) {
+                     var n=addSqlSelectRow($jfil);
+                     $jfil.tbl[n]=tbllst[fo].trim();
+                     var tobj=getDbTableAttr(tbllst[fo]);
+                     $jfil.tbldsc[n]=tobj.desc;
+                 }
+              }
+
+              
+              //group Fields  
+              if (viewattr[4]){           
+                 var grplst=viewattr[4].split(',');
+                 for (var fo=0; fo<grplst.length; fo++) {
+                     var n=addSqlSelectRow($grp);
+                     $grp.ord[n]=fo+1;
+                     $grp.gfld[n]=grplst[fo].trim();
+                 }
+              }
+            
+
+              break;  
+
+           }
+
+     }
+
+
+   //fields
+
+   setSqlSelectResult(tviewfld,$fld);
+   changeContent('viewfields',applyTableDef(tviewfld));
+
+   setSqlSelectResult(tviewjfil,$jfil);
+   changeContent('viewjoinfiles',applyTableDef(tviewjfil));
+
+   setSqlSelectResult(tvieword,$grp);
+   changeContent('viewgrp',applyTableDef(tvieword));
+
+   displayForm('screen7'); 
+}
+
+
+
+function newViewField() {
+
+  document.getElementById('divscreen8').style.height=100;
+
+  clearForm('screen8');
+  checkVar('vselallflds','*off');
+  protect('vflddesc','vfldlen','vflddec','vfldtyp');
+  unProtect('vfldnam');
+  setWriteOff('vfldnam');
+
+  hideElement('vallfldspan');
+
+  //If no join file and no field specified allow all field selection 
+  posTabCursor('tviewjfil','top');
+  readRow();
+  if (eof) {
+
+     posTabCursor('tviewfld','top');
+     readRow();
+     if (eof) {showElement('vallfldspan');}
+
+  }
+
+  if (valueOfCol('vfld#fld') == '*') {
+     alert('All fields of table already included for view');
+     return; 
+  }
+
+  displayForm('screen8');  
+
+
+}
+
+
+function toggleAddViewIndFld() {
+    if (isChecked('vselallflds'))  {
+       clearForm('screen8');
+       protect('vfldnam');
+    }
+    else {
+       unProtect('vfldnam');
+       setWriteOff('vfldnam');
+    }
+
+   return;
+}
+
+
+function newVTblFldLookupInit() {
+  fldpmtselect='viewfield';
+
+  var $flds1=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+  
+  setSqlSelectResult(fldpmt1,$flds1);
+  changeContent('vfldpmttable',applyTableDef(fldpmt1));
+
+   
+  //load main table
+   var fldarr=new Array();
+   fldarr[0]=valueOf('seldbtable');
+   
+
+   posTabCursor('tviewjfil','top');
+   readRow();
+   while (!eof) {
+      fldarr.push(valueOfCol('vjf#tbl'));
+      readRow();
+   }
+
+
+   loadSelect('vwtblselect',fldarr);
+
+  
+  displayForm('pmtscreen2',ypos,xpos);
+  
+
+}
+
+
+function newViewTblFldLookup() {
+
+   var $flds1=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+
+   
+   var arr=new Array();
+   var i=0; 
+   var vfldfnd='N';
+   var vf = '';
+   var vf1 = '';
+   var srchstr='';
+
+
+   var obj=getDbTableAttr(valueOf('vwtblselect'));
+   var fldlst=obj.field.split(',');
+   for (var fo=0; fo<fldlst.length; fo++) {
+
+        vfldfnd='N';
+        srchstr=fldlst[fo].toUpperCase().trim();
+
+        posTabCursor('tviewfld','top');
+        readRow();
+        while (!eof) {
+           vf1 = valueOfCol('vfld#fld').split('.');
+           if (vf1[1]) {vf = vf1[1].toUpperCase().trim();}
+           else {vf = vf1[0].toUpperCase().trim();}
+           if (srchstr == vf) {
+              vfldfnd='Y';
+              break;
+           }
+           readRow();
+        }
+
+        if (vfldfnd=='N'){
+           arr.push(fldlst[fo]);
+        }
+
+   }
+
+  
+   for (i=0; i<arr.length; i++) {
+
+        fltyp='char';
+
+        f=getFieldAttr(arr[i]);
+
+        if (f.decimal) {
+           fltyp='number';
+           if (f.type == 'date') {fltyp='date';} 
+           if (f.type == 'time') {fltyp='time';} 
+        }
+
+       
+        var n=addSqlSelectRow($flds1);
+ 
+        $flds1.fld[n]=arr[i];
+        $flds1.flddsc[n]=f.desc;
+        $flds1.fldtyp[n]=fltyp;
+        $flds1.fldlen[n]=f.length;
+        $flds1.flddec[n]=f.decimal;
+           
+   }  
+
+
+   setSqlSelectResult(fldpmt1,$flds1); 
+   changeContent('vfldpmttable',applyTableDef(fldpmt1)); 
+
+   if (arr.length ==0) {alert('All fields of table already recorded for view')} 
+
+   return;
+
+
+}
+
+function fldpmt1Clicked() {
+  readClickedRow(); 
+   
+    changeVar('vfldnam',valueOfCol('fp1#fld'));
+    changeVar('vflddesc',valueOfCol('fp1#flddsc'));
+    changeVar('vfldtyp',valueOfCol('fp1#fldtyp'));
+    changeVar('vfldlen',valueOfCol('fp1#fldlen'));
+    changeVar('vflddec',valueOfCol('fp1#flddec'));
+  
+    closeForm();
+
+}
+
+
+
+function doAddViewIndFld() {
+  
+     if (isChecked('vselallflds'))  {
+         newRow('tviewfld');
+         changeCol('vfld#fld','*');
+         
+     }
+     else{
+        if (isBlank(valueOf('vfldnam'))) {alert('Please select a field'); return;}
+        newRow('tviewfld');
+        changeCol('vfld#fld',valueOf('vwtblselect')+'.'+valueOf('vfldnam'));
+     }
+
+     closeForm();
+  
+     changeVar('viewchanged','Y');
+
+} 
+
+
+function viewFldTableClicked() {
+   readClickedRow();
+    if (!eof) {popUpContent('viewfldoptlst'); ispop=false;}
+
+}
+
+
+function doDeleteViewFld() {
+    var x=window.confirm("Do you wish to remove this field?")
+    if (x) { 
+       deleteRow();
+       posTabCursor('tviewfld','top');
+       readRow();
+       if (eof) {
+           var $fld=new sqlSelectResult('fld');
+           setSqlSelectResult(tviewfld,$fld);
+           changeContent('viewfields',applyTableDef(tviewfld)); 
+           changeVar('viewchanged','Y');
+       }
+    }
+    return;
+
+}
+
+
+//*****View Join File processing*************************
+
+function newViewJoinFil() {
+   clearForm('screen9');
+  
+  protect('vjtbldsc');
+  unProtect('vjtblnam');
+  setWriteOff('vjtblnam');
+
+
+  posTabCursor('tviewfld','top');
+  readRow();
+  if (!eof) {
+ 
+     if (valueOfCol('vfld#fld') == '*') {
+        alert('Unable to record join file if * recorded for view fields');
+        return; 
+     }
+  }
+
+  displayForm('screen9');
+
+}
+
+
+function newjTblLookupInit() {
+  fldpmtselect='viewfield';
+  changeVar('vtplkpfld','');
+
+  var $tbl=new sqlSelectResult('tbl','tbldsc');
+  
+  setSqlSelectResult(tablpmt,$tbl);
+  changeContent('vtblpmttable',applyTableDef(tablpmt));
+  
+  displayForm('pmtscreen3',ypos,xpos);
+  focusOn('vtplkpfld');
+  
+
+}
+
+function newViewTblLookup() {
+
+  if (isBlank(valueOf('vtplkpfld'))) {alert('Enter portion of Table ID'); return;}
+
+   var fldarr=new Array();
+   fldarr[0]=valueOf('seldbtable');
+   
+
+   posTabCursor('tviewjfil','top');
+   readRow();
+   while (!eof) {
+      fldarr.push(valueOfCol('vjf#tbl'));
+      readRow();
+   }
+
+
+  var $tbl=new sqlSelectResult('tbl','tbldsc');
+
+  var srchflen=valueOf('vtplkpfld').length;
+  var srchfld=valueOf('vtplkpfld').toUpperCase().trim();
+  var objfl1='';
+  var objfl='';
+
+  var tablfnd='N';
+
+  for (property in dataDic.table) {
+      objfl1=property.sst(1,srchflen);
+      objfl=objfl1.toUpperCase().trim();
+      if (srchfld == objfl) {
+
+        for (var ii=0; ii<fldarr.length; ii++) {
+            if (property == fldarr[ii]){
+               tablfnd='Y';
+               break;
+            }
+
+        } 
+
+        if (tablfnd=='N') {
+           var obj=getDbTableAttr(property);
+           var n=addSqlSelectRow($tbl);
+           $tbl.tbl[n]=property;
+           $tbl.tbldsc[n]=obj.desc;
+        }
+
+      } 
+  }
+  
+  setSqlSelectResult(tablpmt,$tbl);
+  changeContent('vtblpmttable',applyTableDef(tablpmt)); 
+
+}
+
+
+function tablpmtClicked() {
+   readClickedRow();  
+   changeVar('vjtblnam',valueOfCol('tpmt#tbl'));
+   changeVar('vjtbldsc',valueOfCol('tpmt#tbldsc'));
+   closeForm();
+}
+
+
+function doAddViewJTable() {
+       
+     if (isBlank(valueOf('vjtblnam'))) {alert('Please select a Table'); return;}
+     newRow('tviewjfil');
+     changeCol('vjf#tbl',valueOf('vjtblnam'));
+     changeCol('vjf#tbldsc',valueOf('vjtbldsc'));
+     
+     closeForm();
+  
+     changeVar('viewchanged','Y');
+
+} 
+
+
+
+
+function viewJFileTableClicked() {
+   readClickedRow();
+    if (!eof) {popUpContent('viewjtabloptlst'); ispop=false;}
+
+}
+
+
+function doDeleteViewJTable() {
+    var x=window.confirm("Do you wish to remove this field?")
+    if (x) { 
+       deleteRow();
+       posTabCursor('tviewjfil','top');
+       readRow();
+       if (eof) {
+           var $jfil=new sqlSelectResult('tbl','tbldsc');
+           setSqlSelectResult(tviewjfil,$jfil);
+           changeContent('viewjoinfiles',applyTableDef(tviewjfil));
+           changeVar('viewchanged','Y');
+       }
+    }
+    return;
+
+}
+
+
+
+//*****View Group Field processing*************************
+
+
+function newVGrpField() {
+   
+   processmode='newvgrpfld';
+   unProtect('*form:screen10');
+   clearForm('screen10');
+
+   //Load order select
+
+   var fldarr1=new Array();
+   var cntarry=new Array(); 
+   var cnt=0;
+   posTabCursor('tvieword','top');
+   readRow();
+   while (!eof) {
+        cnt++;
+        cntarry.push(cnt);
+        fldarr1.push(valueOfCol('vord#ord'));
+        readRow();
+   }  
+
+   cnt++; 
+   cntarry.push(cnt);
+
+   loadSelect('grpfldpos',cntarry);
+   changeVar('grpfldpos',cnt); 
+   
+
+   changeContent('vgrptabtitl','Add Group Field to Table');
+   
+   showElement('savebutton8');
+
+   displayForm('screen10');  
+
+}
+
+
+
+
+function newVGrpFldLookupInit() {
+  
+  var $flds1=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+  
+  setSqlSelectResult(fldpmt2,$flds1);
+  changeContent('vgfldpmttable',applyTableDef(fldpmt2));
+
+   
+  //load main table
+   var fldarr=new Array();
+   fldarr[0]=valueOf('seldbtable');
+   
+
+   posTabCursor('tviewjfil','top');
+   readRow();
+   while (!eof) {
+      fldarr.push(valueOfCol('vjf#tbl'));
+      readRow();
+   }
+
+
+   loadSelect('vwgftblselect',fldarr);
+
+  
+  displayForm('pmtscreen4',ypos,xpos);
+  
+
+}
+
+
+function newVGrpFldLookup() {
+
+   var $flds1=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+
+   
+   var arr=new Array();
+   var i=0; 
+   var vfldfnd='N';
+   var vf = '';
+   var vf1 = '';
+   var srchstr='';
+
+
+   var obj=getDbTableAttr(valueOf('vwgftblselect'));
+   var fldlst=obj.field.split(',');
+   for (var fo=0; fo<fldlst.length; fo++) {
+
+        vfldfnd='N';
+        srchstr=fldlst[fo].toUpperCase().trim();
+
+        posTabCursor('tvieword','top');
+        readRow();
+        while (!eof) {
+           vf1 = valueOfCol('vord#gfld').split('.');
+           if (vf1[1]) {vf = vf1[1].toUpperCase().trim();}
+           else {vf = vf1[0].toUpperCase().trim();}
+           if (srchstr == vf) {
+              vfldfnd='Y';
+              break;
+           }
+           readRow();
+        }
+
+        if (vfldfnd=='N'){
+           arr.push(fldlst[fo]);
+        }
+
+   }
+
+  
+   for (i=0; i<arr.length; i++) {
+
+        fltyp='char';
+
+        f=getFieldAttr(arr[i]);
+
+        if (f.decimal) {
+           fltyp='number';
+           if (f.type == 'date') {fltyp='date';} 
+           if (f.type == 'time') {fltyp='time';} 
+        }
+
+       
+        var n=addSqlSelectRow($flds1);
+ 
+        $flds1.fld[n]=arr[i];
+        $flds1.flddsc[n]=f.desc;
+        $flds1.fldtyp[n]=fltyp;
+        $flds1.fldlen[n]=f.length;
+        $flds1.flddec[n]=f.decimal;
+           
+   }  
+
+
+   setSqlSelectResult(fldpmt2,$flds1); 
+   changeContent('vgfldpmttable',applyTableDef(fldpmt2)); 
+
+   if (arr.length ==0) {alert('All fields of table already recorded')} 
+
+   return;
+
+
+}
+
+
+function fldpmt2Clicked() {
+    readClickedRow(); 
+    changeVar('grpfldnam',valueOfCol('fp2#fld'));
+    closeForm();
+
+}
+
+
+
+
+function viewGrpFldMaint() {
+   if (processmode=='newvgrpfld'){ doAddVGrpFld();}
+   else { doChgVGrpFld();} 
+  
+}
+
+
+
+
+function doAddVGrpFld() {
+   if (isBlank(valueOf('grpfldnam'))) {
+      alert('Please select desired field'); 
+      return;
+   }
+ 
+   var $grp=new sqlSelectResult('ord','gfld');
+
+   var dbtabl=valueOf('vwgftblselect');
+   var newgrpfld=valueOf('vwgftblselect')+'.'+valueOf('grpfldnam');
+
+
+   var i=0;
+
+
+   if (valueOf('grpfldpos')=='1') {
+      var n=addSqlSelectRow($grp);
+      $grp.ord[n]=numValueOf('grpfldpos');
+      $grp.gfld[n]=newgrpfld.trim();
+      i++;
+   }
+
+   posTabCursor('tvieword','top');
+   readRow();
+   while (!eof) {
+        i++; 
+        if (i > 1 && numValueOf('grpfldpos')==(i)){
+           var n=addSqlSelectRow($grp);
+           $grp.ord[n]=numValueOf('grpfldpos');
+           $grp.gfld[n]=newgrpfld.trim();
+           i++;
+        }
+        var n=addSqlSelectRow($grp);
+        $grp.ord[n]=numeric(i);
+        $grp.gfld[n]=valueOfCol('vord#gfld');
+        readRow();
+   } 
+
+   if (numValueOf('grpfldpos')>numeric(i)) {
+       var n=addSqlSelectRow($grp);
+       $grp.ord[n]=numValueOf('grpfldpos');
+       $grp.gfld[n]=newgrpfld.trim();
+   }
+   
+
+   setSqlSelectResult(tvieword,$grp);
+   changeContent('viewgrp',applyTableDef(tvieword));
+
+   changeVar('viewchanged','Y'); 
+
+   closeForm();
+   
+   
+}
+
+
+function vGrpTableClicked() {
+  readClickedRow();
+  if (!eof) {popUpContent('vgrpfldoptlst'); ispop=false;}
+
+
+}
+
+
+
+
+function chgVGrpField() {
+   processmode='chgvgrpfld';
+   unProtect('*form:screen10');
+   clearForm('screen10');
+
+   //Load order select
+
+   var fldarr1=new Array();
+   var cntarry=new Array(); 
+   var cnt=0;
+   posTabCursor('tvieword','top');
+   readRow();
+   while (!eof) {
+        cnt++;
+        cntarry.push(cnt);
+        fldarr1.push(valueOfCol('vord#ord'));
+        readRow();
+   }  
+
+   cnt++; 
+   cntarry.push(cnt);
+
+   loadSelect('grpfldpos',cntarry);
+   changeVar('grpfldpos',valueOfCol('vord#ord')); 
+
+   
+   changeVar('grpfldnam',valueOfCol('vord#gfld'));
+   protect('grpfldnam');
+
+   savefrmvarvg= new saveVar('*form:screen10');
+
+   
+   showElement('savebutton8');
+
+   changeContent('vgrptabtitl','Maintain Group Field Position');
+
+   displayForm('screen10');     
+
+
+}
+
+
+function doChgVGrpFld() {
+  if (!savefrmvarvg.hasChangedVar()) {
+        closeForm();
+        return;
+  }
+
+  deleteRow();
+
+  var $grp=new sqlSelectResult('ord','gfld');
+
+  var i=0;
+
+
+   if (valueOf('grpfldpos')=='1') {
+      var n=addSqlSelectRow($grp);
+      $grp.ord[n]=numValueOf('grpfldpos');
+      $grp.gfld[n]=valueOf('grpfldnam');
+      i++;
+   }
+
+   posTabCursor('tvieword','top');
+   readRow();
+   while (!eof) {
+        i++; 
+        if (i > 1 && numValueOf('grpfldpos')==(i)){
+           var n=addSqlSelectRow($grp);
+           $grp.ord[n]=numValueOf('grpfldpos');
+           $grp.gfld[n]=valueOf('grpfldnam');
+           i++;
+        }
+        var n=addSqlSelectRow($grp);
+        $grp.ord[n]=numeric(i);
+        $grp.gfld[n]=valueOfCol('vord#gfld');
+        readRow();
+   } 
+
+   i++;
+
+   if (numValueOf('grpfldpos')>numeric(i)) {
+       var n=addSqlSelectRow($grp);
+       $grp.ord[n]=numeric(i);
+       $grp.gfld[n]=valueOf('grpfldnam');
+   }
+   
+
+   setSqlSelectResult(tvieword,$grp);
+   changeContent('viewgrp',applyTableDef(tvieword));
+
+    
+   changeVar('viewchanged','Y');
+
+   closeForm();
+   
+   
+
+
+}
+
+
+
+function doDeleteVGrpFld() {
+
+   var $grp=new sqlSelectResult('ord','gfld');
+   var i=0;
+   var x=window.confirm("Do you wish to remove this field?")
+    if (x) { 
+       deleteRow();
+       posTabCursor('tvieword','top');
+       readRow();
+       if (!eof) {
+           while (!eof) {
+                i++; 
+                var n=addSqlSelectRow($grp);
+                $grp.ord[n]=numeric(i);
+                $grp.gfld[n]=valueOfCol('vord#gfld');
+                readRow();
+           } 
+       }
+       
+    }
+
+    setSqlSelectResult(tvieword,$grp);
+    changeContent('viewgrp',applyTableDef(tvieword)); 
+    changeVar('viewchanged','Y');
+   
+}
+
+
+//*************************General Functions*****************************
+
+
+function saveDataDic(initsave) {
+   if (initsave) {
+	  var answer = confirm("Press OK to back up the data dictionary to the C: drive. Otherwise press cancel.");
+	  if (!answer) {return;}
+   } 
+
+   var fltyp='';
+   var txt='';
+   var arr=new Array();
+   var prop;
+   var i=0; 
+
+   //Data dictionary initial function/code 
+
+   txt +="var dicfield = false;\r\n"; 
+   txt +="for (property in dataDic.field) {\r\n"; 
+   txt +="  dicfield=true;\r\n"; 
+   txt +="  break;\r\n";  
+   txt +="}\r\n";   
+   txt +="if (!dicfield) {\r\n";  
+   txt +="  loadDictionary();\r\n"; 
+   txt +="}\r\n\r\n"; 
+
+   txt +="function loadDictionary() {\r\n"; 
+
+
+   for (prop in dataDic.field) {
+        arr.push(prop);
+   }
+   arr.sort();
+   for (i=0; i<arr.length; i++) {
+        f=getFieldAttr(arr[i]);
+        if (f.decimal) {
+           fltyp=f.length+','+f.decimal;  
+           if (f.type == 'date') {fltyp='date';} 
+           if (f.type == 'time') {fltyp='time';} 
+        }
+        else {fltyp=f.length;}
+        txt +="addDicField('"+arr[i]+":"+fltyp+":"+f.desc+"');\r\n"; 
+   }  
+
+ 
+  //Table definitions
+
+   txt+='\r\n\r\n var dt=""';
+ 
+   var arrt=new Array();
+   var i=0; 
+   for (property in dataDic.table) {
+        arrt.push(property);
+   }
+   arrt.sort();
+   for (i=0; i<arrt.length; i++) {
+        var f=getDbTableAttr(arrt[i]);
+
+        txt += '\r\n$dt=new dbTableDef("'+arrt[i]+'")\r\n';
+        txt += '$dt.desc="'+f.desc+'"\r\n';
+        txt += '$dt.field="'+f.field+'"\r\n'; 
+        if (f.keyfield) { txt += '$dt.keyfield="'+f.keyfield+'";\r\n'; }
+        else{ txt += '$dt.keyfield=" ";\r\n';}
+        if (f.index) {
+           for (var l=0; l<f.index.length; l++) {
+               txt += '$dt.index['+l+']="'+f.index[l]+'";\r\n'; 
+           }
+        }
+        if (f.view) {
+           for (var l=0; l<f.view.length; l++) {
+               txt += '$dt.view['+l+']="'+f.view[l]+'";\r\n'; 
+           }
+        }
+
+        txt += 'applyDbTableDef($dt);\r\n'; 
+  } 
+ 
+  txt +="\r\n\r\n";
+  txt +="}\r\n";  
+
+  
+   
+   if (!initsave) {
+      //Update original dictionary
+	  var answer = confirm("Data dictionary in the location specified will be updated..do you wish to proceed?");
+	  if (!answer) {return;}
+      //deletePcFile(updloctn);
+	  sendToPcFile(updloctn,txt);
+	  alert('Data dictionary successfully updated');
+   }
+   else {
+		//deletePcFile('c:/dataDictionary.js');
+		sendToPcFile('c:/dataDictionary.js',txt);
+		alert('Data dictionary has been backed up to the C: drive');
+   }
+   
+   
+   
+} 
+
+
+
+
+function toggleFldForm() {
+  unProtect('flddec','fldlen');
+  changeVar('fldlen',0);
+  changeVar('flddec',0);
+
+  if (valueOf('fldtyp') == 'C') {
+     protect('flddec');
+  }
+  if (valueOf('fldtyp') == 'D') {
+     changeVar('fldlen',8);
+     protect('flddec','fldlen');
+
+  }
+  if (valueOf('fldtyp') == 'T') {
+     changeVar('fldlen',4);
+     protect('flddec','fldlen');
+
+  }
+
+
+} 
+
+
+
+function srchtble(srchval){
+  if (valueOf('srchopt')=='A'){
+     searchCol('table2','t1#fld',srchval,'partial');
+  }
+  if (valueOf('srchopt')=='B'){
+     searchCol('table2','t1#flddsc',srchval,'partial');
+  }
+}
+
+
+
+function srchtble1(srchval){
+  if (valueOf('srchopt1')=='A'){
+     searchCol('table1','t#tab1',srchval,'partial');
+  }
+  if (valueOf('srchopt1')=='B'){
+     searchCol('table1','t#tabdsc',srchval,'partial');
+  }
+}
+
+
+//***********************Print fields*********************************************
+
+function printDicFields() {  
+   var fltyp='';
+
+   var $flds=new sqlSelectResult('fld','flddsc','fldtyp','fldlen','flddec');
+
+   var txt='';
+   var arr=new Array();
+   var prop;
+   var i=0; 
+   for (prop in dataDic.field) {
+        arr.push(prop);
+   }
+   arr.sort();
+   for (i=0; i<arr.length; i++) {
+
+        fltyp='char';
+
+        f=getFieldAttr(arr[i]);
+
+        if (f.decimal) {
+           fltyp='number';
+           if (f.type == 'date') {fltyp='date';} 
+           if (f.type == 'time') {fltyp='time';} 
+        }
+        
+        var n=addSqlSelectRow($flds);
+ 
+        $flds.fld[n]=arr[i];
+        $flds.flddsc[n]=f.desc;
+        $flds.fldtyp[n]=fltyp;
+        $flds.fldlen[n]=f.length;
+        $flds.flddec[n]=f.decimal;
+           
+   }  
+  
+   
+   rpttab=new reportTableDef();
+   rpttab.header=['Field','Field Description','Field Type','Length','Decimal'];
+   for (var h=0; h<5; h++) {
+     rpttab.headstyle[h]="border-bottom:1px solid;";
+   }
+   rpttab.width=[110,350,100,100,100];
+   rpttab.align=['','','','right','right'];
+   
+   rpttab.rowsperpage=50;
+     
+   rpt=new reportDef();
+   rpt.reporttable=rpttab;
+   
+   
+   rpt.pagehead =  '<pos style="right:0">Page: @page</pos>';
+   rpt.pagehead += '<div style="width:1000; font-size:120%; text-align:center">';
+   rpt.pagehead += '<br>Data Dictionary';
+   rpt.pagehead += '<br>Field Listing';
+   rpt.pagehead += '<br>Dictionary Location '+loctn+'</div><br><br>';
+
+  
+   useReport(rpt);
+         
+   loadReportTable($flds,'fld,flddsc,fldtyp,fldlen,flddec');
+     
+   createReport();
+   viewReport(); 
+ 
+
+   return;
+   
+} 
+
+function printSingleDicTables() {
+   printDicTables('single');
+}
+
+
+function printDicTables(prttype) {
+
+ $rarry=new sqlSelectResult('tab1','tabdsc','fld','flddsc','fldtyp','fldlen','flddec','keyflds');
+ 
+ if (arguments.length==0) {
+	for (property in dataDic.table) {
+        getTableData(property);
+	}
+ }
+ else {
+   property=valueOfCol('t#tab1');
+   getTableData(property);
+ }
+    
+   rpttab=new reportTableDef();
+   rpttab.header=['','','','',''];
+   
+   rpttab.width=[100,350,100,100,100];
+   rpttab.align=['','','','right','right'];
+   
+   rpttab.rowsperpage=52;
+     
+   rpt=new reportDef();
+   rpt.reporttable=rpttab;
+      
+   rpt.pagehead =  '<pos style="right:0">Page: @page</pos>';
+   rpt.pagehead += '<div style="width:1000; font-size:120%; text-align:center">';
+   rpt.pagehead += '<br>Data Dictionary';
+   rpt.pagehead += '<br>Table Listing';
+   rpt.pagehead += '<br>Dictionary Location '+loctn+'</div><br>';
+
+   rptbkh0=new reportBreak();
+   rptbkh0.condition="($rarry.tab1[*row]!=$rarry.tab1[*row-1] || (rpttab.currenttablerow + 1) > rpttab.rowsperpage)";
+   rptbkh0.summary='header';
+   rptbkh0.pageafter=false; 
+   rptbkh0.text[0]='*line';
+   rptbkh0.text[1]='<left>Table: <@:$rarry.tab1[*row]@> </left><left style="margin-left:50px"> Name: <@:$rarry.tabdsc[*row]@></left>';
+   rptbkh0.text[2]='<br>';
+   rptbkh0.text[3]='*array:phead0';
+                       phead0=new Array();
+                       phead0[0]='<left>Field</left>';
+					   phead0[1]='<left>Description</left>';   
+					   phead0[2]='<left>Field Type</left>';
+					   phead0[3]='Length';
+					   phead0[4]='Decimal';
+   rptbkh0.text[4]='*line';
+   addReportBreak(rpt,rptbkh0); 
+   
+   rptbkf=new reportBreak();
+   rptbkf.condition="($rarry.tab1[*row]!=$rarry.tab1[*row+1])";
+   rptbkf.summary='count:0';
+   rptbkf.pageafter=false; 
+   rptbkf.text[0]='<br>';
+   rptbkf.text[1]='<left>Key Field(s): <@:$rarry.keyflds[*row]@> </left>';
+   rptbkf.text[2]='<br>';
+   addReportBreak(rpt,rptbkf); 
+   
+  
+   useReport(rpt);
+         
+   loadReportTable($rarry,'fld,flddsc,fldtyp,fldlen,flddec');
+     
+   createReport();
+   viewReport(); 
+
+
+ return;
+
+}
+
+function getTableData(property) {
+
+ var obj=getDbTableAttr(property);
+		
+	//Get assoc. keys
+       var kfldlst='No Key Fields';
+	   if (!isBlank(obj.keyfield)) {
+	      kfldlst=obj.keyfield;
+	   }
+ 
+       var fldlst=obj.field.split(',');
+          if (!isBlank(fldlst[0])) {
+           for (var fo=0; fo<fldlst.length; fo++) {
+
+                var n=addSqlSelectRow($rarry);
+				//table and description
+				$rarry.tab1[n]=property;
+				$rarry.tabdsc[n]=obj.desc;
+				//fields
+				var flobj=getFieldAttr(fldlst[fo]); 
+                $rarry.fld[n]=fldlst[fo];
+                $rarry.flddsc[n]=flobj.desc;
+				var fltyp='char';
+				if (flobj.decimal) {
+					fltyp='number';
+					if (flobj.type == 'date') {fltyp='date';} 
+					if (flobj.type == 'time') {fltyp='time';} 
+                }
+				$rarry.fldtyp[n]=fltyp;
+				$rarry.fldlen[n]=flobj.length;
+				$rarry.flddec[n]=flobj.decimal;
+				
+				//add key fields
+                $rarry.keyflds[n]=kfldlst;
+           }
+          }
+
+   return;
+}
+
+
+
+</script>
+
+
+<div id=wrkarea style="display:none">
+<br>
+<table>
+<col width="570"/><col width="500"/>
+  <tr><td>
+  <span class=label style="width:150">Dictionary Location:</span>&nbsp<span id=dicloctn class=label style="width:300;color:#8b0000"></span>
+  </td><td>
+  <span button=savedicbut type=new onclick="exeFunction('saveDataDic()')">Save to Dictionary</span>
+  </td></tr>
+</table>
+<br>
+<table frame=box rules=all>
+<col width="570"/><col width="500"/>
+  <tr><td>
+  <br>
+  <div id=sugdiv>
+  <span class=label style="width:71;margin-left:10px">Search by</span>&nbsp
+  <select name=srchopt onChange="changeVar('srchopt',this.value); changeVar('sugfld','');focusOn('sugfld')">
+    <option value="A">Field</option> 
+    <option value="B">Description</option> 
+   </select>
+   &nbsp
+   <span class=label style="width:50">Search</span>&nbsp
+   <input id=sugfld size=15 onkeyup="srchtble(this.value)"></div>
+   <br>
+
+  <div id=screen2table style="margin-left:10px"></div>
+  <br>
+  <span button=newbutton type=new onclick="newRecord()">Create New Field</span>
+  <span button=fldlistbut type=new onclick="exeFunction('printDicFields()')">Print Field List</span>
+
+  </td><td> 
+  <br>
+  <div id=sugdiv1>
+  <span class=label style="width:71;margin-left:10px">Search by</span>&nbsp
+  <select name=srchopt1 onChange="changeVar('srchopt1',this.value); changeVar('sugfld1','');focusOn('sugfld1')">
+    <option value="A">Table ID</option> 
+    <option value="B">Description</option> 
+   </select>
+   &nbsp
+   <span class=label style="width:50">Search</span>&nbsp
+   <input id=sugfld1 size=15 onkeyup="srchtble1(this.value)"></div>
+   <br>
+
+  <div id=screen1table style="margin-left:10px"></div>
+  <br>
+  <span button=newtablbutton type=new onclick="newTableRecord()">Create New Table</span>
+  <span button=tbllistbut type=new onclick="exeFunction('printDicTables()')">Print Table Details</span>
+  
+ </td></tr>
+</table> 
+
+
+
+<div id=optionlist1 style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td id=chgopt onclick=exeFunction('changeRecord()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Change</td></tr>
+<tr><td id=delopt onclick=exeFunction('deleteRecord()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+<tr><td id=viewopt onclick=exeFunction('viewRecord()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>View</td></tr>
+<tr><td id=viewopt1 onclick="showFieldAssoc('view')"
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>View Related Objects</td></tr>
+</table>
+</div>
+
+
+<div id=optionlist2 style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td id=chgopt2 onclick="changeTableRecord()"
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Change Table Header</td></tr>
+   <tr><td id=chgopt2 onclick="deleteTableRecord()"
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete Table</td></tr>
+<tr><td id=viewopt2 onclick="mntableProperties()"
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Maintain Table Details</td></tr>
+<tr><td id=prtopt2 onclick="exeFunction('printSingleDicTables()')"
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Print Table Details</td></tr>   
+</table>
+</div>
+
+
+<div id=tablefieldoptlst style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td id=tfdelopt onclick=exeFunction('showTableFieldAssoc()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+</table>
+</div>
+
+
+<div id=tablekfieldoptlst style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td id=tkfchgopt onclick=exeFunction('chgTablKeyField()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Change Keyfield Position</td></tr>
+<tr><td id=tkfdelopt onclick=exeFunction('dltTablKeyField()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+</table>
+</div>
+
+
+<div id=tableviewoptlst style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td id=tvchgopt onclick=exeFunction('chgTablView()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Maintain View</td></tr>
+<tr><td id=tvdltopt onclick=
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+</table>
+</div>
+
+
+<div id=viewfldoptlst style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td onclick=doDeleteViewFld()
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+</table>
+</div>
+
+
+<div id=viewjtabloptlst style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td onclick=doDeleteViewJTable()
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+</table>
+</div>
+
+
+<div id=vgrpfldoptlst style='display:none' class='optionMenu'>
+<table border=1 cellspacing=0 cellpadding=0>
+<Col class=optionitem>
+<tr><td onclick=exeFunction('chgVGrpField()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Change Groupfield Position</td></tr>
+<tr><td onclick=exeFunction('doDeleteVGrpFld()')
+   onMouseOver=newClass('optionitemm')
+   onMouseOut=newClass('optionitem')>Delete</td></tr>
+</table>
+</div>
+
+
+
+<div id="divscreen2" style="display:none" class="window">
+<form name=screen2>
+<div id=tabtitl class="titleBar">Maintain Dictionary Field</div>
+<span button=exitbutton type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+    <table cellpadding=4>
+    <tr><td>
+    <span class=label>Field</span>&nbsp<input type=text name=fldnam size=12 maxlength=10>
+    </td></tr><tr><td>
+    <span class=label>Field Description</span>&nbsp<input type=text name=flddesc size=42 maxlength=40><span style="width:50"></span>
+    </td></tr><tr><td>
+    <span class=label>Type</span>
+          <select name=fldtyp onChange="toggleFldForm()">
+           <option value="C">Character</option> 
+           <option value="N">Number</option>
+           <option value="D">Date</option> 
+           <option value="T">Time</option> 
+          </select>
+    </td></tr><tr><td>
+    <span class=label>Length</span>&nbsp<input type=text name=fldlen size=6 maxlength=6 
+     class=numeric onBlur="editField(this,0,'j')">
+    </td></tr><tr><td>
+    <span class=label>Decimal</span>&nbsp<input type=text name=flddec size=6 maxlength=6 
+     class=numeric onBlur="editField(this,0,'j')">
+    </td></tr>
+    </table><br>
+ <div class=buttonarea>
+   <span button=savebutton type=save onclick="processFld()"></span>
+   <span button=deletebutton type=delete onclick="showFieldAssoc('delete')"></span>
+   <span button=cancelbutton type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+
+<div id="divscreen3" style="display:none" class="window">
+<form name=screen3>
+<div id=assoctitl class="titleBar"></div>
+<span button=exitbutton1 type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+<span class=label style="width:40">Field</span>&nbsp<span style="border:1px solid blue;background-color: '#F0FFF0';" class=label id=rmvfld></span>
+<input type=hidden name=removefld>
+<br>
+<table frame=box rules=all>
+  <tr>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Tables</span></td>
+  <!--<td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Views</span></td>-->
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Indexes</span></td>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Key Definitions</span></td>
+  </tr>
+  <tr>
+    <td><span style="height:300; width:100%;" id=frmvtbl></span></td>
+    <!--<td><span style="height:300; width:100%;" id=frmvview></span></td>-->
+    <td><span style="height:300; width:100%;" id=frmvindex></span></td>
+    <td><span style="height:300; width:100%;" id=frmvkeys></span></td>
+  </tr>
+</table>
+<br>
+<div id=rmvmsgdiv style="border:1px solid;height:40; width:600; overflow:auto"></div>
+<br>
+<span button=acceptbutton type=accept onclick="processFldDelete()">Proceed</span>
+<span button=cancelbutton1 type=cancel onclick="closeForm()"></span>
+</form>
+</div>
+
+
+
+
+<div id="divscreen4" style="display:none" class="window">
+<form name=screen4>
+<div class="titleBar">:Table Details</div>
+<span button=exitbutton2 type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+<input type=hidden name=seldbtable>
+<input type=hidden name=seldbtabledsc>
+<span class=label style="width:40">Table</span>&nbsp<span style="border:1px solid blue;background-color: '#F0FFF0';width:350" class=label id=dbtableid></span>
+<br>
+<table frame=box rules=all>
+  <tr>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Fields</span></td>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Key Definition</span></td>
+   <!--<td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Views</span></td>-->
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Indexes</span></td>
+  </tr>
+  <tr>
+    <td><span style="height:300; width:100%;" id=tblflds></span></td>
+    <td><span style="height:300; width:100%;" id=tblkeys></span></td>
+    <!--<td><span style="height:300; width:100%;" id=tblview></span></td>-->
+    <td><span style="height:300; width:100%;" id=tblindex></span></td> 
+  </tr>
+  <tr>
+    <td><span style=" width:100%;background-color: '#CFE2FA'"><span button=tbladdfbutton type=new onclick="newTablField()">Add Field</span></span></td>
+    <td><span style=" width:100%;background-color: '#CFE2FA'"><span button=tbladdkfbutton type=new onclick="newTablKeyField()">Add Key Field</span></span></td>
+    <td><span style=" width:100%;background-color: '#CFE2FA';display:none"><span button=tbladdvwbutton type=new onclick="newTablView()">Add View</span></span></td>
+    <td><span style=" width:100%;background-color: '#CFE2FA';display:none"></span></td> 
+  </tr>
+</table>
+<br>
+<span button=cancelbutton2 type=close onclick="closeForm()"></span>  
+</form>
+</div>
+
+
+
+<div id="divscreen5" style="display:none" class="window">
+<form name=screen5>
+<div id=tabtitl class="titleBar">Add Field to Table</div>
+<span button=exitbutton3 type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+    <table cellpadding=4>
+    <tr><td>
+    <span class=label>Field</span>&nbsp<input type=text name=ntfldnam size=12 maxlength=10 style="background-color: '#F0F8FF'" onClick="newTblFldLookupInit();">
+    </td></tr><tr><td>
+    <span class=label>Field Description</span>&nbsp<input type=text name=ntflddesc size=42 maxlength=40 style="background-color: '#F0F8FF'"><span style="width:50"></span>
+    </td></tr><tr><td>
+    <span class=label>Type</span>&nbsp<input name=ntfldtyp size=20 maxlength=17 style="background-color: '#F0F8FF'">
+    </td></tr><tr><td>
+    <span class=label>Length</span>&nbsp<input type=text name=ntfldlen size=6 maxlength=6 
+     class=numeric onBlur="editField(this,0,'j')" style="background-color: '#F0F8FF'">
+    </td></tr><tr><td>
+    <span class=label>Decimal</span>&nbsp<input type=text name=ntflddec size=6 maxlength=6 
+     class=numeric onBlur="editField(this,0,'j')" style="background-color: '#F0F8FF'">
+    </td></tr>
+    </table><br>
+ <div class=buttonarea>
+   <span button=savebutton3 type=save onclick="doAddTblFld()"></span>
+   <span button=cancelbutton3 type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+<div id="divpmtscreen1" style="display:none" class="window">
+<form name=pmtscreen1>
+<div id=tabtitl class="titleBar">:Field Prompt</div>
+<span button=exitbutton4 type=exit class="ximage" onclick="closeForm()"></span>
+<span>Enter portion of Field then click GO</span>
+<br>
+<input type=text name=fplkpfld size=15 maxlength=10>
+&nbsp<button onclick="newTblFldLookup()">Go</button>
+<br><br>
+<div id=fldpmttable></div>
+</form>
+</div>
+
+
+<div id="divpmtscreen2" style="display:none" class="window">
+<form name=pmtscreen2>
+<div id=tabtitl class="titleBar">:Field Prompt</div>
+<span button=exitbutton4v type=exit class="ximage" onclick="closeForm()"></span>
+<span>Select table then click GO</span>
+<br>
+<select name=vwtblselect></select>
+&nbsp<button onclick="newViewTblFldLookup()">Go</button>
+<br><br>
+<div id=vfldpmttable></div>
+</form>
+</div>
+
+
+<div id="divpmtscreen3" style="display:none" class="window">
+<form name=pmtscreen3>
+<div id=tabtitl class="titleBar">:Table Prompt</div>
+<span button=exitbutton4t type=exit class="ximage" onclick="closeForm()"></span>
+<span>Enter portion of table ID then click GO</span>
+<br>
+<input type=text name=vtplkpfld size=15 maxlength=10>
+&nbsp<button onclick="newViewTblLookup()">Go</button>
+<br><br>
+<div id=vtblpmttable></div>
+</form>
+</div>
+
+
+<div id="divpmtscreen4" style="display:none" class="window">
+<form name=pmtscreen4>
+<div id=tabtitl class="titleBar">:Field Prompt</div>
+<span button=exitbutton4gf type=exit class="ximage" onclick="closeForm()"></span>
+<span>Select table then click GO</span>
+<br>
+<select name=vwgftblselect></select>
+&nbsp<button onclick="newVGrpFldLookup()">Go</button>
+<br><br>
+<div id=vgfldpmttable></div>
+</form>
+</div>
+
+           
+
+<div id="divscreen6" style="display:none" class="window">
+<form name=screen6>
+<div id=ktabtitl class="titleBar"></div>
+<span button=exitbutton5 type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+    <table cellpadding=4>
+    <tr><td>
+    <span class=label>Key Field</span>&nbsp<select name=ntkfldnam style="background-color: '#F0F8FF'"></select>
+    <span style="width:80"></span>
+    </td></tr><tr><td>
+    <span class=label>Position</span>&nbsp<select name=ntkfldpos style="background-color: '#F0F8FF'"></select>
+    </td></tr>
+    </table><br>
+ <div class=buttonarea>
+   <span button=savebutton4 type=save onclick="tblKeyFldMaint()"></span>
+   <span button=deletebutton4 type=delete onclick="doDeleteTblKeyFld()"></span>
+   <span button=cancelbutton4 type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+
+<div id="divscreen7" style="display:none" class="window">
+<form name=screen7>
+<div class="titleBar">:Maintain View Details</div>
+<span button=exitbutton6 type=exit class="ximage" onclick="closeForm()"></span>
+<input type=hidden name=viewchanged>
+<br>
+<span class=label style="width:100">View Name</span>&nbsp<input type=text name=viewnam size=12 maxlength=10>
+<br>
+<table frame=box rules=all>
+  <tr>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Fields</span></td>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Join Files</span></td>
+  <td style="font-family:arial;font-size:12px;font-weight:bold;"><span style="width:150;">Group By</span></td>
+  </tr>
+  <tr>
+    <td><span style="height:300; width:100%;" id=viewfields></span></td>
+    <td><span style="height:300; width:100%;" id=viewjoinfiles></span></td>
+    <td><span style="height:300; width:100%;" id=viewgrp></span></td>
+  </tr>
+  <tr>
+    <td><span style=" width:100%;background-color: '#00FFFF'"><span button=vwaddfbutton type=new onclick="newViewField()">Add Field</span></span></td> 
+    <td><span style=" width:100%;background-color: '#00FFFF'"><span button=vwaddjfbutton type=new onclick="newViewJoinFil()">Add Join File</span></span></td>
+    <td><span style=" width:100%;background-color: '#00FFFF'"><span button=vwaddgfbutton type=new onclick="newVGrpField()">Add Group Field</span></span></td> 
+  </tr>
+</table>
+<br>
+<span button=savebutton5 type=save onclick=""></span>  
+<span button=cancelbutton5 type=cancel onclick="closeForm()"></span>
+</form>
+</div>
+         
+
+<div id="divscreen8" style="display:none" class="window">
+<form name=screen8>
+<div id=tabtitl class="titleBar">:Maintain Field for View</div>
+<span button=exitbutton7 type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+    <table cellpadding=4>
+    <tr><td>
+    <div id=vallfldspan>
+    <input type=checkbox name=vselallflds onclick="toggleAddViewIndFld()">&nbsp<span class=label>Select All Fields</span> 
+    <br>
+    <span class=label style="margin-left:200">or</span> 
+    <hr>
+    <span class=label style="margin-left:130">Record Individual Field</span>
+    </div>
+    </td></tr><tr><td>
+    <span class=label>Field</span>&nbsp<input type=text name=vfldnam size=12 maxlength=10 style="background-color: '#F0F8FF'" onClick="newVTblFldLookupInit();">
+    </td></tr><tr><td>
+    <span class=label>Field Description</span>&nbsp<input type=text name=vflddesc size=42 maxlength=40 style="background-color: '#F0F8FF'"><span style="width:50"></span>
+    </td></tr><tr><td>
+    <span class=label>Type</span>&nbsp<input name=vfldtyp size=20 maxlength=17 style="background-color: '#F0F8FF'">
+    </td></tr><tr><td>
+    <span class=label>Length</span>&nbsp<input type=text name=vfldlen size=6 maxlength=6 
+     class=numeric onBlur="editField(this,0,'j')" style="background-color: '#F0F8FF'">
+    </td></tr><tr><td>
+    <span class=label>Decimal</span>&nbsp<input type=text name=vflddec size=6 maxlength=6 
+     class=numeric onBlur="editField(this,0,'j')" style="background-color: '#F0F8FF'">
+    </td></tr>
+    </table><br>
+ <div class=buttonarea>
+   <span button=savebutton6 type=save onclick="doAddViewIndFld()"></span>
+   <span button=cancelbutton6 type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+<div id="divscreen9" style="display:none" class="window">
+<form name=screen9>
+<div class="titleBar">:Record Join File</div>
+<span button=exitbutton8 type=exit class="ximage" onclick="closeForm()"></span>
+<br><br>
+    <table cellpadding=4>
+    <tr><td>
+    <span class=label>Table</span>&nbsp<input type=text name=vjtblnam size=12 maxlength=10 style="background-color: '#F0F8FF'" onclick="newjTblLookupInit()">
+    <span style="width:80"></span>
+    </td></tr><tr><td>
+    <span class=label>Description</span>&nbsp<input type=text name=vjtbldsc size=42 maxlength=40 style="background-color: '#F0F8FF'"><span style="width:50"></span>
+    </td></tr>
+    </table><br><br>
+ <div class=buttonarea>
+   <span button=savebutton7 type=save onclick="doAddViewJTable()"></span>
+    <span button=cancelbutton7 type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+<div id="divscreen10" style="display:none" class="window">
+<form name=screen10>
+<div id=vgrptabtitl class="titleBar"></div>
+<span button=exitbutton9 type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+    <table cellpadding=4>
+    <tr><td>
+    <span class=label>Group Field</span>&nbsp<input type=text name=grpfldnam style="background-color: '#F0F8FF'" onClick="newVGrpFldLookupInit();">
+    <span style="width:80"></span>
+    </td></tr><tr><td>
+    <span class=label>Position</span>&nbsp<select name=grpfldpos style="background-color: '#F0F8FF'"></select>
+    </td></tr>
+    </table><br>
+ <div class=buttonarea>
+   <span button=savebutton8 type=save onclick="viewGrpFldMaint()"></span>
+   <span button=cancelbutton8 type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+
+<div id="divscreen11" style="display:none" class="window">
+<form name=screen11>
+<div id=tabtitl class="titleBar">Maintain Table</div>
+<span button=exittblbutton type=exit class="ximage" onclick="closeForm()"></span>
+<br>
+    <table cellpadding=4>
+    <tr><td>
+    <span class=label>Table</span>&nbsp<input type=text name=tablenam size=12 maxlength=10>
+    </td></tr><tr><td>
+    <span class=label>Table Description</span>&nbsp<input type=text name=tabledesc size=42 maxlength=40><span style="width:50"></span>
+    </td></tr>
+    </table><br>
+ <div class=buttonarea>
+   <span button=savetblbutton type=save onclick="processTable()"></span>
+   <span button=deletetblbutton type=delete onclick="processTable()"></span>
+   <span button=canceltblbutton type=cancel onclick="closeForm()"></span>
+ </div> 
+</form>
+</div>
+
+
+</div>

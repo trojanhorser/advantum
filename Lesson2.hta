@@ -1,0 +1,139 @@
+<hta:windowState="maximize">
+
+<html>
+<head><title>Lesson2-saveVar, etc</title></head>
+<body onload=exeFunction('loadUp()')>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type="text/JavaScript" src="startup.js"></script>
+<script type="text/JavaScript" src="datadictionary.js"></script>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+
+<script>
+function loadUp() {
+ focusOn('bilno');
+}
+/*
+string prototypes
+ string.trim();
+ string.triml();
+ string.trimr();
+ string.strip(text1,text2,text3); 
+ string.sqlWrap(string);  eg. "abcd".sqlWrap()--> "'abcd'" or "a'bc'd".sqlWrap()  ---> "'a''bc''d'"
+ string.sst(start,length);
+*/
+
+// saveVar(); returnChangedVar(); restoreVar(); hasChangedVar(); savedValueOf();
+
+function saveData(which) {
+  if (which=='all') {
+      saved=new saveVar('*form:form1');
+  }
+  else {
+      saved=new saveVar('bilno','rcpdate');
+	  // saved={};
+	  // saved.bilno=valueOf('bilno');
+	  // saved.rcpdate=valueOf('rcpdate');
+  }
+  say('Data saved..',2);
+}
+
+function alertChangedData() {
+  changeddata=saved.returnChangedVar();
+  for (p in changeddata) {
+       if (p != 'addVar' && p != 'removeVar') {
+           alert('Field: '+p+' === Value: '+valueOf(p)+' === Saved Value:'+saved.savedValueOf(p)); // saved[p]
+	   }
+  }
+  // or
+  changeddata=saved.returnChangedVar('array');
+  for (p=0; p<changeddata.length; p++) {
+       fld=changeddata[p];
+       alert('OR...Field: '+fld+' === Value: '+valueOf(fld)+' === Saved Value:'+saved.savedValueOf(fld));
+  } 
+}
+
+function restoreChangedData() {
+  saved.restoreVar(); // restoreVar() == > all Variables; restoreVar('v1','v2'...,vn) ==> selected Variables 
+}
+
+function wasDataChanged() {
+  if (saved.hasChangedVar()) { // hasChangedVar() == > Any Variable changed; hasChangedVar('v1','v2'...,vn) ==> Any of selected Variables changed
+      alert('Yes');
+  }
+  else {
+      alert('No');
+  }
+}
+
+function getTableData() {
+  //sqlSelect(sql select statement,data-object name, number of records, connection)
+  var sqltxt="select bilno, cnsign, 'nothing' as n from wsblhead";
+  if (!sqlSelect(sqltxt,'$data',1000)) {
+      alert(sqlerr);
+	  return false;
+  }
+  if ($data.rcdcnt==0) {alert('No data found'); return false}
+  alert($data.rcdcnt+'==='+$data.bilno[5]+'==='+$data.cnsign[5]+'==='+$data.n[5]);
+}
+
+
+function insertData() {
+ updobj={};
+ updobj.linnum=666;
+ updobj.linnam='Mark of Beast';
+ if (!sqlInsert('wsline',updobj)) {
+      alert(sqlerr);
+	  return false;
+ }
+ alert('Done');
+}
+
+
+// updateobject=new sqlUpdObj(v1,v2,v3)
+
+function updateData() {
+  updobj={};
+  updobj.linnam='Mark of Bitch';
+  sqlwhere='linnum=666';
+ if (!sqlUpdate('wsline',updobj,sqlwhere)) {
+      alert(sqlerr);
+	  return false;
+ }
+ alert('Done');
+}
+
+function deleteData() {
+   sqlwhere='linnum=666';
+ if (!sqlDelete('wsline',sqlwhere)) {
+       alert(sqlerr);
+	  return false;
+ }
+ alert('Done');
+}
+</script>
+
+
+<div id="divform1">
+	<form name=form1>
+	    <br> 
+	    <span field=bilno></span><br>
+		<span field=rcpdate></span><br>
+		<span field=descr></span><br>
+		<span field=amount></span><br>
+		<hr>
+		<span button=di1 onclick=saveData('all')>Save All Data</span>&nbsp;&nbsp;
+		<span button=di2 onclick=saveData('some') width=250>Save B/L and Receipt Date Only</span>&nbsp;&nbsp;
+		<span button=di3 onclick=alertChangedData()>Alert Changed</span>&nbsp;&nbsp;
+		<span button=di4 onclick=restoreChangedData()>Restore Changed</span>&nbsp;&nbsp;
+		<span button=di5 onclick=wasDataChanged() width=140>Was Data Changed?</span>&nbsp;&nbsp;
+		<hr>
+	</form>
+</div>
+<div id=msgarea></div>
+
+<button onclick=getTableData()>Get Data</button><br>
+<button onclick=insertData()>Insert Record</button><br>
+<button onclick=updateData()>Update Record</button><br>
+<button onclick=deleteData()>Delete Record</button><br>
+

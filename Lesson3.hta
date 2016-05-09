@@ -1,0 +1,51 @@
+<HTA:APPLICATION 
+border="thin" 
+borderStyle="normal" 
+caption="yes" 
+icon="http://www.htmlgoodies.com/favicon.ico" 
+maximizeButton="yes" 
+minimizeButton="yes" 
+showInTaskbar="yes" 
+windowState="maximize"
+innerBorder="yes"
+navigable="yes"
+scroll="auto"
+scrollFlat="yes" />
+<html>
+<head><title>Lesson3-Example</title></head>
+<body onload=exeFunction('loadUp()')>
+<script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
+<script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
+<script type="text/JavaScript" src="startup.js"></script>
+<script type="text/JavaScript" src="datadictionary.js"></script>
+<script type="text/JavaScript" src="datadictionary.js"></script>
+<script type="text/JavaScript" src="Lesson3.js"></script>
+<link rel=stylesheet type='text/css' href='../pcstools/standardss.css'></link>
+
+
+<div class=outputarea style="width:300px; height:100px">
+<br>
+<span field=inconcde ref=concde></span><br>
+<hr>
+<span button=accept onclick=getData()></span>&nbsp;
+<span button=new type=new onclick=newData()></span>
+</div>
+
+<div id="divform1" style="display:none;" class="window">
+	<form name=form1>
+	<div id=titlebar1 class="titleBar"></div>
+	<span button=exitbutton type=exit class="ximage" onclick='closeForm()'></span>
+	<span field=concde></span><br>
+	<span field=connam></span><br>
+	<span field=conadd></span><br>
+	<span field=conadd2></span><br>
+	<span field=conadd3></span><br>
+	<span field=conadd4></span><br>
+	<span field=conadd5></span><br>
+	<span field=conemail></span><br>
+	<span button=addNewRecord type=new onclick=addNewRecord() label=Add></span>
+</form>
+</div>
+ 
+</div>
+
