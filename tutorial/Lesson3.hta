@@ -20,7 +20,7 @@ version="1.0"
 windowState="normal">
 <html>
 <head><title>Lesson3-Example</title></head>
-<body onload=exeFunction('loadUp()')>
+<body>
 <script type='text/JavaScript' src='../pcstools/standardjs.js'></script>
 <script type='text/JavaScript' src='../pcstools/standardsq.js'></script>
 <script type="text/JavaScript" src="startup.js"></script>
@@ -35,7 +35,7 @@ windowState="normal">
 <span field=inconcde ref=concde></span><br>
 <hr>
 <span button=accept onclick=getRecord()></span>&nbsp;
-<span button=new type=new onclick=newData()></span>
+<span button=new type=new onclick=newRecord()></span>
 </div>
 
 <div id="divform1" style="display:none;" class="window">
@@ -51,8 +51,11 @@ windowState="normal">
 	<span field=conadd5></span><br>
 	<span field=conemail></span><br>
 	<span button=addNewRecord type=new onclick=addNewRecord('wsconsgn') label=Add></span>
+	<span button=saverecord onClick = updateRecord()>Save Record</span>
+	<span button=clearform onClick = clearForm('form1')>Clear Form</span>
+	<span button=deleterecord onClick = deleteRecord(valueOf('concde'))>Delete Record</span>
+	<span button=closeform onClick = closeForm()>Cancel</span>
+
 </form>
 </div>
- 
 </div>
-
