@@ -16,8 +16,6 @@ function newData() {
 */
 function addNewRecord(tableName){
 	
-	alert(window.location);
- 
 	 recordObject = {};
 	 recordObject.concde = valueOf('concde');
 	 recordObject.connam = valueOf('connam');
