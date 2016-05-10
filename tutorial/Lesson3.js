@@ -13,10 +13,16 @@ function newRecord() {
 
 /**
 * Adds a new record to the specfied table
-* @param tableName - name of the table that will be modified
+* @param {string} tableName - name of the table that will be modified
 */
 function addNewRecord(tableName){
 	
+	/**Add savevar **/
+	
+	if( !requiredFieldsAreEntered("concde","connam","conadd","conemail")){
+	    alert("Please enter all required fields");
+		return;
+	}
 	 recordObject = {};
 	 recordObject.concde = valueOf('concde');
 	 recordObject.connam = valueOf('connam');
@@ -35,20 +41,47 @@ function addNewRecord(tableName){
 
 }
 
+/*
+* Checks if all rquired fields have been entered
+* @param {...*} var_args 
+*/
+function requiredFieldsAreEntered(){
+	
+	var result = true;
+	
+	for (var i = 0; i < arguments.length; i++) {
+		
+		if( isBlank( valueOf(arguments[i]) ) ){
+			result = false; 
+		}
+	}
+	
+	return result;
+}
+
 /**
 *
 */
 function updateRecord(){
-
 	// validate field entries
 	saveData();
 }
 
 /**
-* 
+* Deletes a record form a specified table
+* @param {string} tableName - name of the table that will be modified
+* @param {string} connCode - value of the connCode  
 */
-function deleteRecord(){
+function deleteRecord(tableName,connCode){
 	
+	var sqlCondition = "concde=" + valueOf('concde').sqlWrap();
+	
+	if (!sqlDelete(tableName,sqlCondition)) {
+		alert("Record was not deleted: " + sqlerr);
+	}else{
+		alert("Record was Deleted Successfully");
+		clearForm("form1");
+	}
 }
 
 function saveData() {
@@ -90,6 +123,7 @@ function getRecord() {
 	protect('concde');
 	displayForm('form1');
 	focusOn('connam');
+	saveVar()
 }
 /**
  *

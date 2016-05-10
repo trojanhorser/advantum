@@ -42,18 +42,18 @@ windowState="normal">
 	<form name=form1>
 	<div id=titlebar1 class="titleBar"></div>
 	<span button=exitbutton type=exit class="ximage" onclick='closeForm()'></span>
-	<span field=concde></span><br>
-	<span field=connam></span><br>
-	<span field=conadd></span><br>
-	<span field=conadd2></span><br>
-	<span field=conadd3></span><br>
-	<span field=conadd4></span><br>
-	<span field=conadd5></span><br>
-	<span field=conemail></span><br>
-	<span button=addNewRecord type=new onclick=addNewRecord('wsconsgn') label=Add></span>
+	<span field=concde required></span><br>
+	<span field=connam required></span><br>
+	<span field=conadd required></span><br>
+	<span field=conadd2 ></span><br>
+	<span field=conadd3 ></span><br>
+	<span field=conadd4 ></span><br>
+	<span field=conadd5 ></span><br>
+	<span field=conemail required></span><br>
+	<span button=addrecord type=new onclick=addNewRecord('wsconsgn')>Add Record</span>
 	<span button=saverecord onClick = updateRecord()>Save Record</span>
 	<span button=clearform onClick = clearForm('form1')>Clear Form</span>
-	<span button=deleterecord onClick = deleteRecord(valueOf('concde'))>Delete Record</span>
+	<span button=deleterecord onClick = deleteRecord('wsconsgn',valueOf('concde'))>Delete Record</span>
 	<span button=closeform onClick = closeForm()>Cancel</span>
 
 </form>
