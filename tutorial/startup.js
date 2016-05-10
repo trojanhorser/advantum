@@ -34,8 +34,7 @@ conn = new ActiveXObject ("ADODB.Connection");
 
 if (!globaldialogparm.conn) {
     conn = new ActiveXObject ("ADODB.Connection"); 
-    //eval('conn.open ("FileDSN='+getPcFilePath('startup.js').split('\\').join('/')+'/accesspromis.dsn")');
-	eval('conn.open ("FileDSN=C:/Users/denisb/Documents/tutorial/advantum/tutorial//accesspromis.dsn")' )  
+    eval('conn.open ("FileDSN='+getPcFilePath('startup.js').split('\\').join('/')+'/accesspromis.dsn")');
 	globaldialogparm.conn=conn;
 }
 else {

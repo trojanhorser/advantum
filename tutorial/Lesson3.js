@@ -1,14 +1,15 @@
 
 function loadUp() {
- focusOn('inconcde');
+	focusOn('inconcde');
 
 }
 
 function newRecord() {
-  clearForm('form1');
-  unProtect('concde');
-  displayForm('form1');
-  focusOn('concde');
+	clearForm('form1');
+	unProtect('concde');
+	displayForm('form1');
+	focusOn('concde');
+	saved=new saveVar('*form:form1');
 }
 
 /**
@@ -16,7 +17,6 @@ function newRecord() {
 * @param tableName - name of the table that will be modified
 */
 function addNewRecord(tableName){
-	
 	 recordObject = {};
 	 recordObject.concde = valueOf('concde');
 	 recordObject.connam = valueOf('connam');
@@ -39,9 +39,13 @@ function addNewRecord(tableName){
 *
 */
 function updateRecord(){
-
 	// validate field entries
-	saveData();
+	// if(recordValidated()) {
+	// save changes to record
+	saveRecord();
+	// } else {
+	// alert('Record not updated.');
+	//}
 }
 
 /**
@@ -51,19 +55,31 @@ function deleteRecord(){
 	
 }
 
-function saveData() {
-	saved=new saveVar('*form:form1');
+function saveRecord(tablename) {
 	chgddata=saved.returnChangedVar();
-	//test to confirm the fields that have been changed
-	for (chgdfield in chgddata) {
-		if (chgdfield != 'addVar' && chgdfield != 'removeVar') {
-			alert('Field: '+chgdfield+' === Value: '+valueOf(chgdfield)+' === Saved Value:'+saved.savedValueOf(chgdfield));
-	   }
-	// send the change to the DB
-	
+	if (saved.hasChangedVar()) {
+		var i=0;
+		//test to confirm the fields that have been changed
+		for (chgdfield in chgddata) {
+			if (chgdfield != 'addVar' && chgdfield != 'removeVar') {
+				alert('Field: '+chgdfield+' === Value: '+valueOf(chgdfield)+' === Saved Value:'+saved.savedValueOf(chgdfield));
+				i++;
+		   }
+		 }
+		say(i + ' field(s) changed.',5);
+		// send the change to the DB
+		sqlwhere = 'concde=' + (valueOf('concde').sqlWrap());
+		alert(sqlwhere);
+		if (!sqlUpdate(tablename,chgddata,sqlwhere)) {
+			alert(sqlerr);
+		} else {
+			say('Changes saved to database.',5);
+		}
+	} else {
+		alert('No changes made.');
 	}
 }
-
+	
 /**
  *
  *
@@ -90,6 +106,7 @@ function getRecord() {
 	protect('concde');
 	displayForm('form1');
 	focusOn('connam');
+	saved=new saveVar('*form:form1');
 }
 /**
  *
