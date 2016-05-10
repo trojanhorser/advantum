@@ -38,7 +38,7 @@ function addNewRecord(tableName){
 *
 */
 function updateRecord(){
-	
+	  
 }
 
 /**
